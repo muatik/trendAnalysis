@@ -5,10 +5,17 @@ require_once('burstyDetection.php');
 /**
  * TrendDetection 
  * 
- * @example
+ *
+ *
+ * @EXAMPLES
  * $exp=new TrendDetection();
- * $exp->setAnalysisInterval('daily','2013-02-10 21:00');
- * $exp->detect();
+ * //1. starting an analysis
+ * $exp->setAnalysisInterval('hourly','2013-02-11 20:00');
+ * print_r($exp->detect());
+ * 
+ * //2. getting all the cached analysis
+ * print_r($exp->getCachedAnalysis());
+ *
  *
  * @uses BurstyDetection
  * @package 
@@ -160,6 +167,18 @@ class TrendDetection extends BurstyDetection
 		return $o;
 
 	}
+	
+	/**
+	 * caches the result of analysis into local store 
+	 * 
+	 * @param object $result 
+	 * @access protected
+	 * @return object
+	 */
+	protected function cacheAnalysis($result){
+		smongo::$db->analysis->insert($result);
+		return $result;
+	}
 
 	/**
 	 * checks if analysis with specified parameters is already done and
@@ -168,7 +187,7 @@ class TrendDetection extends BurstyDetection
 	 * @access protected
 	 * @return object
 	 */
-	protected function isCached(){
+	protected function isAnalysisCached(){
 		// one more criteria should be added for user authorization.
 		// Analysis request may come from different users for different 
 		// domain, source etc. 
@@ -178,6 +197,27 @@ class TrendDetection extends BurstyDetection
 		));
 	}
 
+	/**
+	 * returns list of cached analysis in local store
+	 * 
+	 * @access public
+	 * @return array
+	 */
+	public function getCachedAnalysis(){
+		$r=smongo::$db->analysis->find(
+			array(),
+			array('interval'=>1,'date'=>1)
+		);
+
+		$r=iterator_to_array($r);
+		foreach($r as $k=>$i){
+			$r[$k]['analysis_id']=(string)$i['_id'];
+			unset($r[$k]['_id']);
+		}
+
+		return $r;
+	}
+	
 	/**
 	 * overriding the method detect() for saving 
 	 * 
@@ -193,7 +233,7 @@ class TrendDetection extends BurstyDetection
 		$r=$this->prepareResult();
 		
 		// saving the result of detection into the database for caching
-		smongo::$db->analysis->insert($r);
+		$r=$this->cacheResult($r);
 		
 		$r->analysis_id=(string)$r->_id;
 		unset($r->_id);
@@ -202,10 +242,5 @@ class TrendDetection extends BurstyDetection
 	
 
 }
-
-
-$exp=new TrendDetection();
-$exp->setAnalysisInterval('hourly','2013-02-11 22:00');
-echo json_encode($exp->detect());
 
 ?>
