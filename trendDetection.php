@@ -225,7 +225,7 @@ class TrendDetection extends BurstyDetection
 	 * @return array
 	 */
 	public function detect(){
-		$cache=$this->isCached();
+		$cache=$this->isAnalysisCached();
 		if($cache)
 			return $cache;
 		

@@ -1,0 +1,161 @@
+Array
+(
+    [_id] => MongoId Object
+        (
+            [$id] => 5122338fd09acbb719000000
+        )
+
+    [interval] => hourly
+    [date] => 2013-02-11 20:00:00
+    [presentPeriod] => Array
+        (
+            [dateStart] => 2013-02-11 19:00:00
+            [dateEnd] => 2013-02-11 20:00:00
+        )
+
+    [pastPeriod] => Array
+        (
+            [dateStart] => 2013-02-03 20:00:00
+            [dateEnd] => 2013-02-10 20:00:00
+        )
+
+    [entries] => Array
+        (
+            [0] => Array
+                (
+                    [event] => #BellLetsTalk Day Tip #1 - Anyone, with any mobile company, will donate 5¢ on Feb. 12 for each tweet with #BellLetsTalk in it.
+                    [terms] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [term] => bellletstalk
+                                    [presentFreqeuncy] => 15
+                                    [presentRatio] => 0.016059957173448
+                                    [pastFrequency] => 0
+                                    [pastRatio] => 0
+                                )
+
+                            [1] => Array
+                                (
+                                    [term] => bellletstalk
+                                    [presentFreqeuncy] => 15
+                                    [presentRatio] => 0.016059957173448
+                                    [pastFrequency] => 0
+                                    [pastRatio] => 0
+                                )
+
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [event] => Geram dengan Maraknya Aksi Kekerasan dalam Angkot, Ahok Pastikan DKI Bebas Angkot http//t.co/pC6hNO9B #Ahok #Angkot [mobile]
+                    [terms] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [term] => angkot
+                                    [presentFreqeuncy] => 13
+                                    [presentRatio] => 0.013918629550321
+                                    [pastFrequency] => 0
+                                    [pastRatio] => 0
+                                )
+
+                            [1] => Array
+                                (
+                                    [term] => ahok
+                                    [presentFreqeuncy] => 9
+                                    [presentRatio] => 0.0096359743040685
+                                    [pastFrequency] => 0
+                                    [pastRatio] => 0
+                                )
+
+                            [2] => Array
+                                (
+                                    [term] => angkot
+                                    [presentFreqeuncy] => 13
+                                    [presentRatio] => 0.013918629550321
+                                    [pastFrequency] => 0
+                                    [pastRatio] => 0
+                                )
+
+                            [3] => Array
+                                (
+                                    [term] => ahok
+                                    [presentFreqeuncy] => 9
+                                    [presentRatio] => 0.0096359743040685
+                                    [pastFrequency] => 0
+                                    [pastRatio] => 0
+                                )
+
+                            [4] => Array
+                                (
+                                    [term] => angkot
+                                    [presentFreqeuncy] => 13
+                                    [presentRatio] => 0.013918629550321
+                                    [pastFrequency] => 0
+                                    [pastRatio] => 0
+                                )
+
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [event] => #Pope For sale one pope mobile, slightly used.
+                    [terms] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [term] => pope
+                                    [presentFreqeuncy] => 26
+                                    [presentRatio] => 0.027837259100642
+                                    [pastFrequency] => 1
+                                    [pastRatio] => 0.0017361111111111
+                                )
+
+                            [1] => Array
+                                (
+                                    [term] => pope
+                                    [presentFreqeuncy] => 26
+                                    [presentRatio] => 0.027837259100642
+                                    [pastFrequency] => 1
+                                    [pastRatio] => 0.0017361111111111
+                                )
+
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [event] => I like Chip Kelly's desire to keep Vick around for a year. It keeps Eagles from having to rebuild offense once he finds mobile QB of future.
+                    [terms] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [term] => vick
+                                    [presentFreqeuncy] => 11
+                                    [presentRatio] => 0.011777301927195
+                                    [pastFrequency] => 0
+                                    [pastRatio] => 0
+                                )
+
+                            [1] => Array
+                                (
+                                    [term] => qb
+                                    [presentFreqeuncy] => 15
+                                    [presentRatio] => 0.016059957173448
+                                    [pastFrequency] => 0
+                                    [pastRatio] => 0
+                                )
+
+                        )
+
+                )
+
+        )
+
+)
