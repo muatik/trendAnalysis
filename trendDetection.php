@@ -106,7 +106,7 @@ class TrendDetection extends BurstyDetection
 	}
 
 	/**
-	 * prepares result of detection for easy reading
+	 * prepares result of detection for convenient and easy reading
 	 * 
 	 * @access protected
 	 * @return object
@@ -162,12 +162,33 @@ class TrendDetection extends BurstyDetection
 	}
 
 	/**
+	 * checks if analysis with specified parameters is already done and
+	 * cached in local store. If so, returns cached result
+	 * 
+	 * @access protected
+	 * @return object
+	 */
+	protected function isCached(){
+		// one more criteria should be added for user authorization.
+		// Analysis request may come from different users for different 
+		// domain, source etc. 
+		return smongo::$db->analysis->findOne(array(
+			"date"=>date('Y-m-d H:i:s',$this->presentEnd),
+			"interval"=>$this->intervalName
+		));
+	}
+
+	/**
 	 * overriding the method detect() for saving 
 	 * 
 	 * @access public
 	 * @return array
 	 */
 	public function detect(){
+		$cache=$this->isCached();
+		if($cache)
+			return $cache;
+		
 		$r=parent::detect();
 		$r=$this->prepareResult();
 		
@@ -178,12 +199,13 @@ class TrendDetection extends BurstyDetection
 		unset($r->_id);
 		return $r;
 	}
+	
 
 }
 
 
 $exp=new TrendDetection();
-$exp->setAnalysisInterval('hourly','2013-02-11 21:00');
+$exp->setAnalysisInterval('hourly','2013-02-11 22:00');
 echo json_encode($exp->detect());
 
 ?>
