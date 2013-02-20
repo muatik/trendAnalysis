@@ -1,0 +1,7 @@
+RewriteEngine On
+RewriteRule ^analysis/([a-z]+)/(.*)$ request.php?task=startAnalysis&interval=$1&date=$2 [L]
+RewriteRule ^analysis/cached$ request.php?task=cached [L]
+RewriteRule ^analysis/([0-9a-z]+)$ request.php?task=getAnalysis&analysisId=$1 [L]
+RewriteRule ^analysis/([0-9a-z]+)/events/(.*)$ request.php?task=getEventDetail&analysisId=$1&eventText=$2 [L]
+RewriteRule ^analysis$ request.php?task=no [L]
+RewriteRule ^$ request.php?task=no [L]
