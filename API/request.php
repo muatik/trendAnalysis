@@ -12,24 +12,24 @@ class trendApi{
 			case 'startAnalysis':
 
 				if (isset($r['interval'],$r['date']))
-					print_r($td->setAnalysisInterval($r['interval'],$r['date']));				
+					json_encode($td->setAnalysisInterval($r['interval'],$r['date']));				
 
 			break;
 
 			case 'cached':
-					print_r($td->getCachedAnalysis());
+					json_encode($td->getCachedAnalysis());
 			break;
 
 			case 'getAnalysis':
 
 				if (isset($r['analysisId']))
-					print_r($td->getCachedAnalysis($r['analysisId']));
+					json_encode($td->getCachedAnalysis($r['analysisId']));
 
 			break;
 
 			case 'getEventDetail':
 				if (isset($r['analysisId'],$r['eventText'])){					
-					print_r($td->getEventDetail($r['analysisId'],$r['eventText']));
+					json_encode($td->getEventDetail($r['analysisId'],$r['eventText']));
 				}
 			break;
 
