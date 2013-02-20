@@ -28,7 +28,8 @@ class trendApi{
 			break;
 
 			case 'getEventDetail':
-				if (isset($r['analysisId'],$r['eventText'])){					
+				if (isset($r['analysisId'],$r['eventText'])){
+					echo $r['eventText'];die();			
 					print_r($td->getEventDetail($r['analysisId'],$r['eventText']));
 				}
 			break;
