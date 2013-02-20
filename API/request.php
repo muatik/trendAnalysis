@@ -29,7 +29,7 @@ class trendApi{
 
 			case 'getEventDetail':
 				if (isset($r['analysisId'],$r['eventText'])){					
-					json_encode($td->getEventDetail($r['analysisId'],$r['eventText']));
+					json_encode($td->getEventOfAnalysis($r['analysisId'],$r['eventText']));
 				}
 			break;
 
