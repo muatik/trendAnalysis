@@ -203,7 +203,7 @@ class TrendDetection extends BurstyDetection
 	 * @access public
 	 * @return array
 	 */
-	public function getCachedAnalysis(){
+	public function getListOfCachedAnalyses(){
 		$r=smongo::$db->analysis->find(
 			array(),
 			array('interval'=>1,'date'=>1)
@@ -218,6 +218,19 @@ class TrendDetection extends BurstyDetection
 		return $r;
 	}
 	
+	/**
+	 * returns the result of the given cached analysis
+	 * 
+	 * @param id $analysisId 
+	 * @access public
+	 * @return object
+	 */
+	public function getCachedAnalysis($analysisId){
+		return smongo::$db->analysis->findOne(
+			array('_id'=>new MongoID($analysisId))
+		);
+	}
+
 	/**
 	 * overriding the method detect() for saving 
 	 * 
