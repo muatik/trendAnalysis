@@ -203,7 +203,7 @@ class TrendDetection extends BurstyDetection
 	 * @access public
 	 * @return array
 	 */
-	public function getCachedAnalysis(){
+	public function getListOfCachedAnalyses(){
 		$r=smongo::$db->analysis->find(
 			array(),
 			array('interval'=>1,'date'=>1)
