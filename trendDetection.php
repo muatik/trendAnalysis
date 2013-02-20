@@ -27,6 +27,11 @@ class TrendDetection extends BurstyDetection
 
 	protected $intervalName;
 
+	public function __construct(){
+		parent::__construct();
+		$this->dummyStatistics=json_decode(file_get_contents('dummyStatistics.json'));
+	}
+	
 	/**
 	 * fetchStream 
 	 * 
@@ -164,6 +169,9 @@ class TrendDetection extends BurstyDetection
 			}
 			$o->entries[]=$oe;
 		}
+
+		$o->statistics=$this->dummyStatistics;
+
 		return $o;
 
 	}
@@ -232,6 +240,33 @@ class TrendDetection extends BurstyDetection
 	}
 
 	/**
+	 * returns the information of the event of the cached analysis
+	 * 
+	 * @param mixed $event 
+	 * @access public
+	 * @return void
+	 */
+	public function getEventOfAnalysis($analysisId, $event){
+		$a=smongo::$db->analysis->findOne(
+			array(
+				'_id'=>new MongoID($analysisId),
+				'entries.event'=>$event
+			)
+		);
+		
+		foreach($a['entries'] as $i)
+			if($i['event']==$event){
+				$i['statistics']=$this->dummyStatistics;
+				$i['pastPeriod']=$a['pastPeriod'];
+				$i['presentPeriod']=$a['presentPeriod'];
+				$i['analysis_id']=(string)$a['_id'];
+				return $i;
+			}
+		
+		return false;
+	}
+
+	/**
 	 * overriding the method detect() for saving 
 	 * 
 	 * @access public
@@ -246,7 +281,7 @@ class TrendDetection extends BurstyDetection
 		$r=$this->prepareResult();
 		
 		// saving the result of detection into the database for caching
-		$r=$this->cacheResult($r);
+		$r=$this->cacheAnalysis($r);
 		
 		$r->analysis_id=(string)$r->_id;
 		unset($r->_id);
