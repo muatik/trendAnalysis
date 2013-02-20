@@ -232,6 +232,28 @@ class TrendDetection extends BurstyDetection
 	}
 
 	/**
+	 * returns the information of the event of the cached analysis
+	 * 
+	 * @param mixed $event 
+	 * @access public
+	 * @return void
+	 */
+	public function getEventOfAnalysis($analysisId, $event){
+		$a=smongo::$db->analysis->find(
+			array(
+				'_id'=>new MongoID($analysisId),
+				'entries.event'=>$event
+			)
+		);
+		
+		foreach($a['entries'] as $i)
+			if($i['event']==$event)
+				return $i;
+
+		return false;
+	}
+
+	/**
 	 * overriding the method detect() for saving 
 	 * 
 	 * @access public
