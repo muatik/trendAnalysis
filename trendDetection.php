@@ -219,6 +219,19 @@ class TrendDetection extends BurstyDetection
 	}
 	
 	/**
+	 * returns the result of the given cached analysis
+	 * 
+	 * @param id $analysisId 
+	 * @access public
+	 * @return object
+	 */
+	public function getCachedAnalysis($analysisId){
+		return smongo::$db->analysis->findOne(
+			array('_id'=>new MongoID($analysisId))
+		);
+	}
+
+	/**
 	 * overriding the method detect() for saving 
 	 * 
 	 * @access public
