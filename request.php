@@ -9,7 +9,7 @@ class trendApi{
 		$r=$_REQUEST;
 		switch ($r['task']){
 
-			case 'startAnalysis':
+		case 'startAnalysis':
 
 				if (isset($r['interval'],$r['date'])){					
 					$td->setAnalysisInterval($r['interval'],$r['date']);
@@ -19,22 +19,20 @@ class trendApi{
 			break;
 
 			case 'cached':				
-					json_encode($td->getListOfCachedAnalyses());
+					echo json_encode($td->getListOfCachedAnalyses());
 			break;
 
 			case 'getAnalysis':
 
 				if (isset($r['analysisId'])){
-					echo $r['analysisId'];
-					json_encode($td->getCachedAnalysis($r['analysisId']));
+					echo json_encode($td->getCachedAnalysis($r['analysisId']));
 				}
 
 			break;
 
 			case 'getEventDetail':
 				if (isset($r['analysisId'],$r['eventText'])){
-					echo $r['analysisId'].'---'.$r['eventText'];
-					json_encode($td->getEventOfAnalysis($r['analysisId'],$r['eventText']));
+					echo json_encode($td->getEventOfAnalysis($r['analysisId'],$r['eventText']));
 				}
 			break;
 
