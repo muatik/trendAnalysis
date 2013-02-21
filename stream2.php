@@ -11,7 +11,8 @@ class Stream
 		$data=array();
 		foreach($criteria['$or'] as $item){			
 			$data[]=sparqlClient::getData(
-				$criteria['keyword'],
+				//$criteria['keyword'],
+				null,
 				$item['at']['$gt'],
 				$item['at']['$lt']
 			);
@@ -23,7 +24,8 @@ class Stream
 	public static function mapreduceHourlyVolume($collection, $domain, $startDate, $endDate){
 				
 		$data=sparqlClient::getData(
-			$domain,
+			//$domain,
+			null,
 			$startDate,
 			$endDate
 		);
@@ -55,7 +57,8 @@ class Stream
 		if($term!=null)	$keywords[]=$term['$regex'];
 		
 		$data=sparqlClient::getData(
-			$keywords,
+			//$keywords,
+			null,
 			$startDate,
 			$endDate
 		);
@@ -77,7 +80,8 @@ class Stream
 	public static function getDomainVolume($domain){
 		
 		$data=sparqlClient::getData(
-			$domain,
+			//$domain,
+			null,
 			$startDate,
 			$endDate
 		);
@@ -111,7 +115,8 @@ class Stream
 		if($term!=null)	$keywords[]=$term['$regex'];
 		
 		$data=sparqlClient::getData(
-			$keywords,
+			//$keywords,
+			null,
 			$startDate,
 			$endDate,
 			null,

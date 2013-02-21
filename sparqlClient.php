@@ -87,13 +87,14 @@ class sparqlClient
 	}
 	
 	
-	public static function getData($keywords,$startDate,$endDate,$lang=null,$limit=null){
-		
-		if (!is_array($keywords)) $keywords=array($keywords);
+	public static function getData($keywords=null,$startDate,$endDate,$lang=null,$limit=null){
 		
 		$filterkeywords='';
-		foreach($keywords as $keyword){
-			$filterkeywords.=' regex(?title,"'.$keyword.'","i") && ';
+		if (isset($keywords)){
+			
+			if (!is_array($keywords)) $keywords=array($keywords);			
+			foreach($keywords as $keyword)
+				$filterkeywords.=' regex(?title,"'.$keyword.'","i") && ';
 		}
 		
 		if (isset($lang))
@@ -133,10 +134,11 @@ class sparqlClient
 			)
 		} order by ?date'.$limit;
 		
+		
 		$sq=new sparql();
 		$result=json_decode($sq->query($query));
 		$bindings=$result->results->bindings;
-		if (count($bindings)==0) {echo '[]'; die();}
+		if (count($bindings)==0) return array();
 		
 		return self::parseData($bindings);
 	}
@@ -197,7 +199,8 @@ class sparqlClient
 			
 			if (isset($item->user)){
 				preg_match('/[^http:\/\/twitter.com\/].*[^#me]/',$item->user->value,$m);
-				$o['user']=$m[0];
+				if (isset($m[0]))
+					$o['user']=$m[0];
 			}
 			else
 				$o['user']=null;		
