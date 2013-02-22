@@ -144,9 +144,11 @@ class TrendDetection extends BurstyDetection
 		);
 		
 		$o->entries=array();
+		$eventId=0;
 		foreach($r as $event){
 			$oe=new stdClass();
 			$oe->event=$event['text'];
+			$oe->eventId=$eventId;
 			$oe->terms=array();
 			foreach($event['intersect'] as $i){
 				$oei=new stdClass();
@@ -168,6 +170,7 @@ class TrendDetection extends BurstyDetection
 				$oe->terms[]=$oei;
 			}
 			$o->entries[]=$oe;
+			$eventId++;
 		}
 		
 		if(count($o->entires)>0)
@@ -260,7 +263,7 @@ class TrendDetection extends BurstyDetection
 		if(!isset($a['entries'][$eventId]))
 			return false;
 
-		$event=$a['entries'][$eventId)];
+		$event=$a['entries'][$eventId];
 		$event['statistics']=$this->dummyStatistics;
 		$event['pastPeriod']=$a['pastPeriod'];
 		$event['presentPeriod']=$a['presentPeriod'];
