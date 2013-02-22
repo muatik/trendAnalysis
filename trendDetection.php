@@ -144,9 +144,11 @@ class TrendDetection extends BurstyDetection
 		);
 		
 		$o->entries=array();
+		$eventId=0;
 		foreach($r as $event){
 			$oe=new stdClass();
 			$oe->event=$event['text'];
+			$oe->eventId=$eventId;
 			$oe->terms=array();
 			foreach($event['intersect'] as $i){
 				$oei=new stdClass();
@@ -168,9 +170,11 @@ class TrendDetection extends BurstyDetection
 				$oe->terms[]=$oei;
 			}
 			$o->entries[]=$oe;
+			$eventId++;
 		}
-
-		$o->statistics=$this->dummyStatistics;
+		
+		if(count($o->entires)>0)
+			$o->statistics=$this->dummyStatistics;
 
 		return $o;
 
@@ -242,11 +246,13 @@ class TrendDetection extends BurstyDetection
 	/**
 	 * returns the information of the event of the cached analysis
 	 * 
-	 * @param mixed $event 
+	 * @param string $analysisId
+	 * @param int $eventId
 	 * @access public
-	 * @return void
+	 * @return object
 	 */
-	public function getEventOfAnalysis($analysisId, $event){
+	public function getEventOfAnalysis($analysisId, $eventId){
+
 		$a=smongo::$db->analysis->findOne(
 			array(
 				'_id'=>new MongoID($analysisId),
@@ -254,16 +260,15 @@ class TrendDetection extends BurstyDetection
 			)
 		);
 		
-		foreach($a['entries'] as $i)
-			if($i['event']==$event){
-				$i['statistics']=$this->dummyStatistics;
-				$i['pastPeriod']=$a['pastPeriod'];
-				$i['presentPeriod']=$a['presentPeriod'];
-				$i['analysis_id']=(string)$a['_id'];
-				return $i;
-			}
-		
-		return false;
+		if(!isset($a['entries'][$eventId]))
+			return false;
+
+		$event=$a['entries'][$eventId];
+		$event['statistics']=$this->dummyStatistics;
+		$event['pastPeriod']=$a['pastPeriod'];
+		$event['presentPeriod']=$a['presentPeriod'];
+		$event['analysis_id']=(string)$a['_id'];
+		return $event;	
 	}
 
 	/**
