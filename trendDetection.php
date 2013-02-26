@@ -173,7 +173,7 @@ class TrendDetection extends BurstyDetection
 			$eventId++;
 		}
 		
-		if(count($o->entires)>0)
+		if(count($o->entries)>0)
 			$o->statistics=$this->dummyStatistics;
 
 		return $o;
