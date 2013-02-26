@@ -255,8 +255,7 @@ class TrendDetection extends BurstyDetection
 
 		$a=smongo::$db->analysis->findOne(
 			array(
-				'_id'=>new MongoID($analysisId),
-				'entries.event'=>$event
+				'_id'=>new MongoID($analysisId)
 			)
 		);
 		
