@@ -16,6 +16,8 @@ class sparql{
 		PREFIX sioct:	<http://rdfs.org/sioc/types#>
 		PREFIX sioc:	<http://rdfs.org/sioc/ns#>
 		PREFIX schema:	<http://schema.org/>
+		PREFIX prov:	<http://www.w3.org/ns/prov-o/>
+		PREFIX l2m:		<http://vacab.deri.ie/l2m#>
 	";
 	
 	public $endpoint='http://vmegov01.deri.ie:8080/l2m/query?query=';	
