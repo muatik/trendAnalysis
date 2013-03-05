@@ -173,7 +173,7 @@ class TrendDetection extends BurstyDetection
 			$eventId++;
 		}
 		
-		if(count($o->entires)>0)
+		if(count($o->entries)>0)
 			$o->statistics=$this->dummyStatistics;
 
 		return $o;
@@ -255,8 +255,7 @@ class TrendDetection extends BurstyDetection
 
 		$a=smongo::$db->analysis->findOne(
 			array(
-				'_id'=>new MongoID($analysisId),
-				'entries.event'=>$event
+				'_id'=>new MongoID($analysisId)
 			)
 		);
 		
