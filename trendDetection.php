@@ -49,7 +49,7 @@ class TrendDetection extends BurstyDetection
 	 * @access protected
 	 * @return array
 	 */
-	protected function fetchStream($stremCriteria){
+	protected function fetchStream($streamCriteria){
 		return iterator_to_array(stream::get($streamCriteria));
 	}
 
