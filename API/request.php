@@ -12,7 +12,11 @@ class trendApi{
 
 		case 'startAnalysisInterval':
 
-				if (isset($r['interval'],$r['date'])){					
+				if (isset($r['interval'],$r['date'])){
+					
+					if (isset($r['ma']))
+						$td->setStreamCriteria(array('ma'=>$r['ma']));
+						
 					$td->setAnalysisInterval($r['interval'],$r['date']);
 					echo json_encode($td->detect());
 				}
