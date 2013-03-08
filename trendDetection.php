@@ -45,12 +45,24 @@ class TrendDetection extends BurstyDetection
 	 * 
 	 * overriding the parent method
 	 *
-	 * @param mixed $criteria 
+	 * @param array $streamCriteria 
 	 * @access protected
 	 * @return array
 	 */
 	protected function fetchStream($streamCriteria){
 		return iterator_to_array(stream::get($streamCriteria));
+	}
+
+	/**
+	 * sets the initial(default) criteria to restrict data stream 
+	 * this may be an empty array.
+	 * 
+	 * @param array $criteria
+	 * @access public
+	 * @return void
+	 */
+	public function setStreamCriteria($criteria){
+		$this->streamCriteria=$criteria;
 	}
 
 	/**
