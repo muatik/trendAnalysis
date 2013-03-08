@@ -27,6 +27,14 @@ class TrendDetection extends BurstyDetection
 
 	protected $intervalName;
 
+	/**
+	 * overriding
+	 *
+	 * @var array
+	 * @access protected
+	 */
+	protected $streamCriteria;
+	
 	public function __construct(){
 		parent::__construct();
 		$this->dummyStatistics=json_decode(file_get_contents('dummyStatistics.json'));
@@ -41,8 +49,8 @@ class TrendDetection extends BurstyDetection
 	 * @access protected
 	 * @return array
 	 */
-	protected function fetchStream($criteria){
-		return iterator_to_array(stream::get($criteria));
+	protected function fetchStream($stremCriteria){
+		return iterator_to_array(stream::get($streamCriteria));
 	}
 
 	/**
