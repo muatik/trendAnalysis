@@ -50,7 +50,7 @@ class TrendDetection extends BurstyDetection
 	 * @return array
 	 */
 	protected function fetchStream($streamCriteria){
-		return iterator_to_array(stream::get($streamCriteria));
+		return stream::get($streamCriteria);
 	}
 
 	/**
@@ -146,8 +146,11 @@ class TrendDetection extends BurstyDetection
 	protected function prepareResult(){
 		$o=new Stdclass();
 		$r=$this->burstyEvents;
+		if(!is_array($r)) 
+			$r=array();
+		
 		$dateFormat='Y-m-d H:i:s';
-
+		
 		$o->interval=$this->intervalName;
 		//$o->language;
 		//$o->language;
