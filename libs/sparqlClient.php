@@ -58,7 +58,6 @@ class sparqlClient
 				
 				$this->startDate=date('Y-m-d',$r['startDate']).'T'.date('H:i:s',$r['startDate']);
 				$this->endDate=date('Y-m-d',$r['endDate']).'T'.date('H:i:s',$r['endDate']);
-				
 			}
 			
 		}else {
@@ -89,7 +88,8 @@ class sparqlClient
 	}
 	
 	
-	public static function getData($keywords=null,$startDate,$endDate,$lang=null,$limit=null){
+	public static function getData($keywords=null,$dates,
+	$lang=null,$ma=null,$limit=null){
 		
 		$filterkeywords='';
 		if (isset($keywords)){
@@ -107,35 +107,45 @@ class sparqlClient
 		if (isset($limit))
 			$limit=' limit '.$limit;
 		else
-			$limit='';			
+			$limit='';
+			
+		if (isset($ma)){
+			$ma=str_replace('?','\\\?',$ma);
+			$filterma=' && regex(str(?generate),"'.$ma.'","i") ';
+		}
+		else
+			$filterma='';
+			
+		$filterdate='';		
+		foreach($dates as $i){			
+			$startDate=date('Y-m-d',$i[0]).'T'.date('H:i:s',$i[0]).'Z';
+			$endDate=date('Y-m-d',$i[1]).'T'.date('H:i:s',$i[1]).'Z';	
+			$filterdate.='|| (?date>"'.$startDate.'" && 
+				?date<"'.$endDate.'")';
+		}
 		
-		$startDate=date('Y-m-d',$startDate).'T'.date('H:i:s',$startDate).'Z';
-		$endDate=date('Y-m-d',$endDate).'T'.date('H:i:s',$endDate).'Z';	
+		$filterdate='('.substr($filterdate,2,strlen($filterdate)-2).')';
 		
 		$query='
 			SELECT 
 					*
 			WHERE{
-						   optional{?cw dcterms:created ?date}.
-						   optional{?cw dc:language ?lang}.
-						   optional{?cw sioc:content ?content }.			   
-						   optional{?cw dcterms:title ?title }.
-						   optional{?cw rev:text ?title }.
-						   optional{?cw sioc:has_topic ?topic}.
-						   optional{?cw schema:geo ?location}.
-						   
-			  
-			optional{ ?cw sioc:has_creator ?user }.
-						   optional{?user schema:gender ?gender}.
-					
+				optional{?cw dcterms:created ?date}.
+				optional{?cw dc:language ?lang}.
+				optional{?cw sioc:content ?content }.			   
+				optional{?cw dcterms:title ?title }.
+				optional{?cw rev:text ?title }.
+				optional{?cw sioc:has_topic ?topic}.
+				optional{?cw schema:geo ?location}.
+				optional{?cw prov:wasGeneratedBy ?generate}.
+				optional{ ?cw sioc:has_creator ?user }.
+				optional{?user schema:gender ?gender}.
 			FILTER (
-				'.$filterkeywords.'
-				(?date>"'.$startDate.'" && 
-				?date<"'.$endDate.'") && regex(str(?cw),"twitter.com")
-				 '.$filterlang.'
+				'.$filterkeywords.$filterdate.'
+				 && regex(str(?cw),"twitter.com")
+				 '.$filterlang.$filterma.'
 			)
 		} order by ?date'.$limit;
-		
 		
 		$sq=new sparql();
 		$result=json_decode($sq->query($query));
@@ -162,7 +172,7 @@ class sparqlClient
 			$o['time']=$date;
 			
 			if (empty($item->title->value)) continue;
-				$o['content']=$item->title->value;
+				$o['text']=$item->title->value;
 			
 			if (isset($item->cw)){				
 				
