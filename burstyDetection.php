@@ -264,13 +264,14 @@ class BurstyDetection
 	}
 	
 	protected function fetchFrameStream($timesOfFrame){
-		$criteria=$this->streamCriteria;
 		$criteria['$or']=array();
 		
 		foreach($timesOfFrame as $i)
 			$criteria['$or'][]=array('at'=> array(
 				'$gt'=>strtotime($i['start']), '$lt'=>strtotime($i['end'])
 			));
+
+		$criteria=array_merge($criteria,$this->streamCriteria);
 
 		return $this->fetchStream($criteria);
 	}
