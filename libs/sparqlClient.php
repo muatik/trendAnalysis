@@ -110,8 +110,7 @@ class sparqlClient
 			$limit='';
 			
 		if (isset($ma)){
-			$ma=str_replace('?','\\\?',$ma);
-			$filterma=' && regex(str(?generate),"'.$ma.'","i") ';
+			$filterma='?cga l2m:associatedMonitoringActivity <'.$ma.'>. ';
 		}
 		else
 			$filterma='';
@@ -127,43 +126,97 @@ class sparqlClient
 		$filterdate='('.substr($filterdate,2,strlen($filterdate)-2).')';
 		
 		$query='
-			SELECT 
-					*
-			WHERE{
-				optional{?cw dcterms:created ?date}.
-				optional{?cw dc:language ?lang}.
-				optional{?cw sioc:content ?content }.			   
-				optional{?cw dcterms:title ?title }.
-				optional{?cw rev:text ?title }.
-				optional{?cw sioc:has_topic ?topic}.
-				optional{?cw schema:geo ?location}.
-				optional{?cw prov:wasGeneratedBy ?generate}.
-				optional{ ?cw sioc:has_creator ?user }.
-				optional{?user schema:gender ?gender}.
-			FILTER (
-				'.$filterkeywords.$filterdate.'
-				 && regex(str(?cw),"twitter.com")
-				 '.$filterlang.$filterma.'
-			)
-		} order by ?date'.$limit;
-		
+                        SELECT * WHERE {
+                                ?cw a sioct:MicroblogPost;
+                                dcterms:created ?date;
+                                dc:language ?lang;
+                                sioc:content ?content;
+                                dcterms:title ?title;
+                                sioc:has_creator ?user;
+                                prov:wasGeneratedBy ?cga.
+                                '.$filterma.'
+                        FILTER (
+                                '.$filterkeywords.$filterdate.'
+                                 '.$filterlang.'
+                        )
+                } order by ?date'.$limit;
+	
 		$sq=new sparql();
 		$result=json_decode($sq->query($query));
-		$bindings=$result->results->bindings;
-		if (count($bindings)==0) return array();
+		if (count($result->results->bindings)==0) return array();
 		
-		return self::parseData($bindings);
+		return self::parseData($result->results->bindings);
 	}
 	
-	public static function parseData($bindings){
+	public static function getDataCount($keywords=null,$dates,
+	$lang=null,$ma=null,$limit=null){
+		
+		$filterkeywords='';
+		if (isset($keywords)){
+			
+			if (!is_array($keywords)) $keywords=array($keywords);			
+			foreach($keywords as $keyword)
+				$filterkeywords.=' regex(?title,"'.$keyword.'","i") && ';
+		}
+		
+		if (isset($lang))
+			$filterlang=' && regex(?lang, "'.$lang.'","i") ';
+		else
+			$filterlang='';
+		
+		if (isset($limit))
+			$limit=' limit '.$limit;
+		else
+			$limit='';
+			
+		if (isset($ma)){
+			$filterma='?cga l2m:associatedMonitoringActivity <'.$ma.'>. ';
+		}
+		else
+			$filterma='';
+			
+		$filterdate='';		
+		foreach($dates as $i){			
+			$startDate=date('Y-m-d',$i[0]).'T'.date('H:i:s',$i[0]).'Z';
+			$endDate=date('Y-m-d',$i[1]).'T'.date('H:i:s',$i[1]).'Z';	
+			$filterdate.='|| (?date>"'.$startDate.'" && 
+				?date<"'.$endDate.'")';
+		}
+		
+		$filterdate='('.substr($filterdate,2,strlen($filterdate)-2).')';
+		
+		$query='
+                        SELECT (count(*) as ?amount) WHERE {
+                                ?cw a sioct:MicroblogPost;
+                                dcterms:created ?date;
+                                dc:language ?lang;
+                                sioc:content ?content;
+                                dcterms:title ?title;
+                                sioc:has_creator ?user;
+                                prov:wasGeneratedBy ?cga.
+                                '.$filterma.'
+                        FILTER (
+                                '.$filterkeywords.$filterdate.'
+                                 '.$filterlang.'
+                        )
+                }';;
+	
+		$sq=new sparql();
+		$result=json_decode($sq->query($query));
+		if (count($result->results->bindings)==0) 
+			return array();
+		
+		return $result->results->bindings;
+	}
+	
+	public static function parseData(&$bindings){
 		
 		/**
 		 * topic içinde aranan source metinleri
 		 * */
 		$source=array('twitter.com','facebook.com','foursquare.com','qype.co.uk');
 		
-		$data=array();
-		foreach($bindings as $item){
+		foreach($bindings as $k=>$item){
 			
 			$o=array();
 				
@@ -215,12 +268,12 @@ class sparqlClient
 					$o['user']=$m[0];
 			}
 			else
-				$o['user']=null;		
-			
-			$data[]=$o;
+				$o['user']=null;
+
+			$bindings[$k]=$o;	
 		}
 		
-		return $data;
+		return $bindings;
 	}
 }
 
