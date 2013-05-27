@@ -27,14 +27,17 @@ class sparql{
 		$query=$this->endpoint.
 			urlencode($this->prefix).urlencode($query).
 			'&output='.$output.'&stylesheet='.urlencode($stylesheet);
+		
+		$ctx=stream_context_create(array('http'=>array(
+		        'timeout' => 120 // 2 minutes
+		    )
+		));
 
-		$contents=@file_get_contents($query);
+		$contents=@file_get_contents($query,false,$ctx);
                 if ($contents)
                         return $contents;
-                else {
-                        echo '{"error":"Does not connect this endpoint: '.$this->endpoint.'"}';
-                        die();
-                }
+		else 
+			return false;
 	}
 }
 
