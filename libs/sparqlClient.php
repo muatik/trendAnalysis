@@ -2,6 +2,8 @@
 header('Content-Type: text/plain; charset=utf-8');
 class sparql{
 	
+	static $error;
+	
 	public $prefix="
 		PREFIX owl: 	<http://www.w3.org/2002/07/owl#>
 		PREFIX xsd: 	<http://www.w3.org/2001/XMLSchema#>
@@ -34,15 +36,23 @@ class sparql{
 		));
 
 		$contents=@file_get_contents($query,false,$ctx);
-                if ($contents)
-                        return $contents;
-		else 
+		if ($contents)
+			return $contents;
+		else {
+			self::$error='Doesn\'t connect this endpoint:'.$this->endpoint;
 			return false;
+		}
+	}
+	
+	public function getLastError(){
+		return self::$error;
 	}
 }
 
-class sparqlClient
+class sparqlClient	
 {
+	static $error;
+	
 	public function getParams(){
 		
 		$r=$_REQUEST;
@@ -151,10 +161,15 @@ class sparqlClient
                 } order by ?date'.$limit;
 	
 		$sq=new sparql();
-		$result=json_decode($sq->query($query));
-		if (count($result->results->bindings)==0) return array();
-		
-		return self::parseData($result->results->bindings);
+		$qresult=$sq->query($query);
+		if ($qresult){
+			$result=json_decode($qresult);
+			if (count($result->results->bindings)==0) return array();
+			return self::parseData($result->results->bindings);
+		}else{
+			self::$error=$sq->getLastError();
+			return false;
+		}
 	}
 	
 	public static function getDataCount($keywords=null,$dates,
@@ -211,11 +226,16 @@ class sparqlClient
                 }';;
 	
 		$sq=new sparql();
-		$result=json_decode($sq->query($query));
-		if (count($result->results->bindings)==0) 
-			return array();
-		
-		return $result->results->bindings;
+		$qresult=$sq->query($query);
+		if ($qresult){
+			$result=json_decode($qresult);
+			if (count($result->results->bindings)==0) 
+				return array();
+			return $result->results->bindings;
+		}else{
+			self::$error=$sq->getLastError();
+			return false;
+		}
 	}
 	
 	public static function parseData(&$bindings){
@@ -283,6 +303,10 @@ class sparqlClient
 		}
 		
 		return $bindings;
+	}
+	
+	public static function getLastError(){
+		return self::$error;
 	}
 }
 

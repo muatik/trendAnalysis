@@ -4,6 +4,8 @@ require_once('libs/sparqlClient.php');
 
 class Stream
 {
+	static $error;
+	
 	public static $table='content_sample';
 
 	public static function get($criteria){
@@ -15,6 +17,7 @@ class Stream
 		foreach($criteria['$or'] as $item)					
 			$dates[]=array($item['at']['$gt'],$item['at']['$lt']);
 		
+		
 		$data=sparqlClient::getData(
 				//$criteria['keyword'],
 				null,
@@ -22,8 +25,13 @@ class Stream
 				null,
 				$ma
 			);
-		
-		return $data;
+			
+		if ($data)
+			return $data;
+		else{
+			self::$error=sparqlClient::getLastError();
+			return false;
+		}
 	}
 
 	public static function mapreduceHourlyVolume($collection, $domain, $startDate, $endDate){
@@ -128,6 +136,9 @@ class Stream
 		
 	}
 	
+	public static function getLastError(){
+		return self::$error;
+	}
 }
 
 ?>
