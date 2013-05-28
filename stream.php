@@ -16,7 +16,6 @@ class Stream
 		foreach($criteria['$or'] as $item)					
 			$dates[]=array($item['at']['$gt'],$item['at']['$lt']);
 		
-		
 		$data=sparqlClient::getData(
 				//$criteria['keyword'],
 				null,

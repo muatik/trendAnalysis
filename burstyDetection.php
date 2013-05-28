@@ -200,11 +200,19 @@ class BurstyDetection
 	 * @access protected
 	 */
 	protected $thresholdRatio;
+	
+	/**
+	 * the latest occured error
+	 * 
+	 * @var mixed
+	 * @access protected
+	 */
+	protected $error;
 
 	public function __construct(){
 	
 		/**
-		 * For default, it is going to be hourly analysis for
+		 * For the default values, it is going to be hourly analysis for
 		 * the current time.
 		 * */
 
@@ -242,7 +250,29 @@ class BurstyDetection
 		);
 
 	}
-	
+
+	/**
+	 * logs the given error as the latest error
+	 * 
+	 * @param string $error 
+	 * @access protected
+	 * @return false
+	 */
+	protected function logError($error){
+		$this->error=$error;
+		return false;
+	}
+
+	/**
+	 * returns the latest error
+	 * 
+	 * @access public
+	 * @return string
+	 */
+	public function getLastError(){
+		return $this->error;
+	}
+
 	protected function prepareTimeListOfSamples($start, $end){
 		$frames=array();
 		$frameEnd=$end;
@@ -291,12 +321,20 @@ class BurstyDetection
 	}
 
 	protected function prepareFrameData(){
-		// fetch present
-		// count and remove duplicates in the present stream
-		// then tokenize
 		
 		$stream=$this->fetchFrameStream($this->sampleTimes['present'][0]);
+		if($stream===false)
+			return $this->logError(
+				'data for the present frame cannot be fetched. '.stream::getLastError()
+			);
+		
 		$this->streamVolume['present']= count($stream);
+		if($this->streamVolume['present']<100)
+			return $this->logError(
+				'data for the present frame is insufficient. '
+				.$this->streamVolume['present'].' items found.'
+			);
+
 		$this->tokens['present']=Tokenization::produceTFList($stream);
 		
 		$present=array();
@@ -327,7 +365,18 @@ class BurstyDetection
 		$past=array();
 		foreach($this->sampleTimes['past'] as $frame){
 			$stream=$this->fetchFrameStream($frame);
+			if($stream===false)
+				return $this->logError(
+					'data for the past frame cannot be fetched. '.stream::getLastError()
+			);
+
 			$this->streamVolume['pastFrames'][]=count($stream);
+			if($this->streamVolume['past']<50)
+				return $this->logError(
+					'data for the present frame is insufficient. '
+					.$this->streamVolume['past'].' items found.'
+				);
+
 			$this->tokens['pastFrames'][]= Tokenization::produceTFList($stream);
 		}
 		
@@ -393,7 +442,7 @@ class BurstyDetection
 		while(count($burstyTerms)>0){
 			$mostSimilar=null;
 			$highestScore=0;
-
+			
 			foreach($this->streams['present'] as $i){
 				
 				$tokenWeight=$i['frequency'] / count($i['tokens']);
@@ -432,7 +481,8 @@ class BurstyDetection
 	public function detect(){
 		$this->init();
 		
-		$this->prepareFrameData();
+		if($this->prepareFrameData()==false)
+			return false;
 
 		$this->detectBurstyTerms();
 		$this->detectBurstyEvents();
