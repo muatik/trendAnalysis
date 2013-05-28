@@ -52,7 +52,7 @@ class Stream
 				$ma
 			);
 			
-		if ($data)
+		if ($data || $data==0)
 			return $data;
 		else{
 			self::$error=sparqlClient::getLastError();
