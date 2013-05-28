@@ -33,7 +33,33 @@ class Stream
 			return false;
 		}
 	}
-
+	
+	public static function count($criteria){
+		
+		$data=array();
+		$ma=(isset($criteria['ma']))?$criteria['ma']:null;
+		$dates=array();
+		
+		foreach($criteria['$or'] as $item)					
+			$dates[]=array($item['at']['$gt'],$item['at']['$lt']);
+		
+		
+		$data=sparqlClient::getDataCount(
+				//$criteria['keyword'],
+				null,
+				$dates,
+				null,
+				$ma
+			);
+			
+		if ($data)
+			return $data;
+		else{
+			self::$error=sparqlClient::getLastError();
+			return false;
+		}
+	}
+	
 	public static function mapreduceHourlyVolume($collection, $domain, $startDate, $endDate){
 		
 		$dates=array(array($startDate,$endDate));

@@ -161,14 +161,19 @@ class sparqlClient
                 } order by ?date'.$limit;
 	
 		$sq=new sparql();
-		$qresult=$sq->query($query);
+		$qresult=$sq->query($query);		
+		
 		if ($qresult){
+			
 			$result=json_decode($qresult);
 			if (count($result->results->bindings)==0) return array();
 			return self::parseData($result->results->bindings);
+						
 		}else{
+			
 			self::$error=$sq->getLastError();
 			return false;
+					
 		}
 	}
 	
@@ -223,18 +228,21 @@ class sparqlClient
                                 '.$filterkeywords.$filterdate.'
                                  '.$filterlang.'
                         )
-                }';;
+                }';
 	
 		$sq=new sparql();
 		$qresult=$sq->query($query);
+		
 		if ($qresult){
-			$result=json_decode($qresult);
-			if (count($result->results->bindings)==0) 
-				return array();
-			return $result->results->bindings;
+								
+			$result=json_decode($qresult);			
+			return $result->results->bindings[0]->amount->value;
+			
 		}else{
+			
 			self::$error=$sq->getLastError();
 			return false;
+			
 		}
 	}
 	
