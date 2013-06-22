@@ -39,7 +39,7 @@ class sparql{
 		if ($contents)
 			return $contents;
 		else {
-			self::$error='Doesn\'t connect this endpoint:'.$this->endpoint;
+			self::$error='cannot connect to the endpoint '.$this->endpoint;
 			return false;
 		}
 	}
@@ -108,7 +108,7 @@ class sparqlClient
 	
 	
 	public static function getData($keywords=null,$dates,
-	$lang=null,$ma=null,$limit=null){
+		$lang=null,$ma=null,$limit=null){
 		
 		$filterkeywords='';
 		if (isset($keywords)){

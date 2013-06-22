@@ -236,6 +236,7 @@ class BurstyDetection
 	}
 	
 	public function init(){
+		$this->error = '';
 		$this->burstyTerms=array();
 		$this->streamVolumes=array();
 		$this->tokens=array();
@@ -331,8 +332,8 @@ class BurstyDetection
 		$this->streamVolume['present']= count($stream);
 		if($this->streamVolume['present']<100)
 			return $this->logError(
-				'data for the present frame is insufficient. '
-				.$this->streamVolume['present'].' items found.'
+				'insufficient data for the present frame. '
+				.$this->streamVolume['present'].' documents found.'
 			);
 
 		$this->tokens['present']=Tokenization::produceTFList($stream);
@@ -373,8 +374,8 @@ class BurstyDetection
 			$this->streamVolume['pastFrames'][]=count($stream);
 			if($this->streamVolume['past']<50)
 				return $this->logError(
-					'data for the present frame is insufficient. '
-					.$this->streamVolume['past'].' items found.'
+					'insufficient data for the present frame. '
+					.$this->streamVolume['past'].' documents found.'
 				);
 
 			$this->tokens['pastFrames'][]= Tokenization::produceTFList($stream);

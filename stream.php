@@ -23,9 +23,12 @@ class Stream
 				null,
 				$ma
 			);
-			
-		if ($data)
+
+		echo "DATA: "; print_r($data); echo "\n-----\n";		
+
+		if ($data!==false){
 			return $data;
+		}
 		else{
 			self::$error=sparqlClient::getLastError();
 			return false;
@@ -50,7 +53,7 @@ class Stream
 				$ma
 			);
 			
-		if ($data || $data==0)
+		if ($data || $data===0)
 			return $data;
 		else{
 			self::$error=sparqlClient::getLastError();

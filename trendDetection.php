@@ -166,6 +166,9 @@ class TrendDetection extends BurstyDetection
 			'dateEnd'=>date($dateFormat,$this->pastEnd)
 		);
 		
+		if($this->getLastError() !== '')
+			$o->error = $this->getLastError();
+		
 		$o->entries=array();
 		$eventId=0;
 		foreach($r as $event){
