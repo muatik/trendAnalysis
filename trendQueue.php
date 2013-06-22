@@ -110,7 +110,7 @@ class trendQueue
 		$n = self::get($id);
 		if($n === false)
 			return false;
-
+		
 		$n['status'] = $status;
 		$n['changed'] = time();
 
@@ -132,6 +132,17 @@ class trendQueue
 		);
 	}
 
+	/**
+	 * updates the given job
+	 * 
+	 * @param object $job 
+	 * @static
+	 * @access public
+	 * @return boolean
+	 */
+	public static function update($job){
+		return smongo::$db->queue->save($job);
+	}
 
 	/**
 	 * returns the job list in the queue. 

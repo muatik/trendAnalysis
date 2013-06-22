@@ -19,7 +19,7 @@ class trendApi{
 
 				if(isset($r['ma']))
 					$criteria = array('ma'=>$r['ma']);
-
+			
 				if(isset($r['queue']) && $r['queue'] == 1){
 					
 					$job = trendQueue::add(

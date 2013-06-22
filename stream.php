@@ -24,8 +24,6 @@ class Stream
 				$ma
 			);
 
-		echo "DATA: "; print_r($data); echo "\n-----\n";		
-
 		if ($data!==false){
 			return $data;
 		}
