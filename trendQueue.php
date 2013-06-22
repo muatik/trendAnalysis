@@ -48,11 +48,17 @@ class trendQueue
 	 * @param string $date 
 	 * @param string $interval 
 	 * @param array $criteria 
+	 * @param string $callback
 	 * @static
 	 * @access public
 	 * @return array
 	 */
-	public static function add($date, $interval, $criteria = array()){
+	public static function add($date, $interval, $criteria = array(), 
+		$callback = null){
+			
+		$job = self::isThere($date, $interval, $criteria);
+		if($job)
+			return $job;
 		
 		$n = array(
 			'at' => time(),
@@ -61,11 +67,35 @@ class trendQueue
 			'interval' => $interval,
 			'criteria' => $criteria
 		);
-			
+		
+		if($callback !=null)
+			$n['callback'] = $callback;
+
 		smongo::$db->queue->insert($n);
 		return $n;
 	}
 
+	
+	/**
+	 * checks if there is already a job matches the given parameters
+	 * 
+	 * @param string $date 
+	 * @param string $interval 
+	 * @param array $criteria 
+	 * @static
+	 * @access public
+	 * @return object
+	 */
+	public static function isThere($date, $interval, $criteria = array()){
+		
+		return smongo::$db->queue->findOne(array(
+			'status'=>array('$ne'=>trendQueueStatus::$cancelled),
+			'date'=>$date,
+			'interval'=> $interval,
+			'criteria'=> $criteria
+		));
+
+	}
 
 	/**
 	 * changes the given job's status.
@@ -134,13 +164,13 @@ class trendQueueStatus
 
 	public static $waiting = 'waiting';
 	public static $completed = 'completed';
-	public static $calceled = 'calceled';
+	public static $cancelled= 'cancelled';
 	public static $running = 'running';
 	
 	public static function get(){
 		return array(
 			'waiting',
-			'calcaled',
+			'cancelled',
 			'running',
 			'completed'
 		);
