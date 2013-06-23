@@ -322,8 +322,9 @@ class BurstyDetection
 	}
 
 	protected function prepareFrameData(){
-		
-		$stream=$this->fetchFrameStream($this->sampleTimes['present'][0]);
+
+		$frame=$this->sampleTimes['present'][0];
+		$stream=$this->fetchFrameStream($frame);
 		if($stream===false)
 			return $this->logError(
 				'data for the present frame cannot be fetched. '.stream::getLastError()
@@ -332,10 +333,11 @@ class BurstyDetection
 		$this->streamVolume['present']= count($stream);
 		if($this->streamVolume['present']<100)
 			return $this->logError(
-				'insufficient data for the present frame. '
-				.$this->streamVolume['present'].' documents found.'
+				'insufficient data for the present frame '.
+				$frame[0]['end'].' - '.$frame[count($frame)-1]['start'].
+				'. '.$this->streamVolume['present'].' documents found.'
 			);
-
+		
 		$this->tokens['present']=Tokenization::produceTFList($stream);
 		
 		$present=array();
@@ -365,22 +367,26 @@ class BurstyDetection
 		
 		$past=array();
 		foreach($this->sampleTimes['past'] as $frame){
+			
 			$stream=$this->fetchFrameStream($frame);
 			if($stream===false)
 				return $this->logError(
 					'data for the past frame cannot be fetched. '.stream::getLastError()
 			);
-
-			$this->streamVolume['pastFrames'][]=count($stream);
-			if($this->streamVolume['past']<50)
+			
+			$frameCount=count($stream);
+			$this->streamVolume['pastFrames'][]=$frameCount;
+			if($frameCount<50)
 				return $this->logError(
-					'insufficient data for the present frame. '
-					.$this->streamVolume['past'].' documents found.'
+					'insufficient data for the past frame '.
+					$frame[0]['end'].' - '.$frame[count($frame[1])]['end'].
+					'. '.$frameCount.' documents found.'
 				);
 
 			$this->tokens['pastFrames'][]= Tokenization::produceTFList($stream);
 		}
-		
+
+		return true;
 	}
 
 	protected function detectBurstyTerms(){

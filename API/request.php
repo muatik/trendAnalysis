@@ -34,6 +34,8 @@ class trendApi{
 					if($job['status'] == trendQueueStatus::$completed)
 						echo json_encode($td->getCachedAnalysis($job['analysisId']));
 					else{
+						$job['id'] = (string)$job['_id'];
+						unset($job['_id']);
 						$job['description'] = 'The job has been inserted into the queue.';
 						echo json_encode($job);
 					}
@@ -68,7 +70,7 @@ class trendApi{
 			break;
 
 			default: 
-				echo "parameters are required";die();
+				echo "required parameters not found";die();
 			break;
 		}
 	}

@@ -23,7 +23,7 @@ class Stream
 				null,
 				$ma
 			);
-
+		
 		if ($data!==false){
 			return $data;
 		}

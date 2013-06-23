@@ -46,7 +46,7 @@ function makeCallback($job){
 
 while(1){
 	run();
-	sleep(7);
+	sleep(5);
 }
 
 ?>

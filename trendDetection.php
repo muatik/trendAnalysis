@@ -37,7 +37,7 @@ class TrendDetection extends BurstyDetection
 	
 	public function __construct(){
 		parent::__construct();
-		//$this->dummyStatistics=json_decode(file_get_contents('dummyStatistics.json'));
+		$this->dummyStatistics=json_decode(file_get_contents('../dummyStatistics.json'));
 	}
 	
 	/**
