@@ -4,6 +4,7 @@ namespace TrendAnalysis\Trends;
 
 use TrendAnalysis\Stream\Stream;
 use \MongoID;
+use \stdClass;
 /**
  * TrendDetection 
  * 

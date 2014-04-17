@@ -17,7 +17,7 @@ $app['db.config.mongodb'] = array(
 	'host' => 'localhost',
 	'database' => 'trendAnalysis_dev',
 	'auth' => false, // Does mongodb require authentication?
-	'user' => '',
+	'username' => '',
 	'password' => ''
 );
 

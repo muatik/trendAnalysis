@@ -4,6 +4,7 @@ namespace TrendAnalysis\Trends;
 
 use TrendAnalysis\Stream\Stream;
 use TrendAnalysis\Libs\Tokenization;
+use TrendAnalysis\Libs\Arrays;
 
 /**
  * BurstyDetection
