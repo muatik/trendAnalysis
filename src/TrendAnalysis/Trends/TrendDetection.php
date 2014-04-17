@@ -1,7 +1,9 @@
 <?php
-require_once('burstyDetection.php');
 
+namespace TrendAnalysis\Trends;
 
+use TrendAnalysis\Stream\Stream;
+use \MongoID;
 /**
  * TrendDetection 
  * 
@@ -35,9 +37,11 @@ class TrendDetection extends BurstyDetection
 	 */
 	protected $streamCriteria;
 	
-	public function __construct(){
+	public function __construct($db, $stream){
 		parent::__construct();
-		$this->dummyStatistics=json_decode(file_get_contents('../dummyStatistics.json'));
+		$this->db = $db;
+		$this->stream = $stream;
+		$this->dummyStatistics=json_decode(file_get_contents('../resources/dummy/dummyStatistics.json'));
 	}
 	
 	/**
@@ -50,7 +54,7 @@ class TrendDetection extends BurstyDetection
 	 * @return array
 	 */
 	protected function fetchStream($streamCriteria){
-		return stream::get($streamCriteria);
+		return $this->stream->get($streamCriteria);
 	}
 
 	/**
@@ -144,7 +148,7 @@ class TrendDetection extends BurstyDetection
 	 * @return object
 	 */
 	protected function prepareResult(){
-		$o=new Stdclass();
+		$o=new \stdClass();
 		$r=$this->burstyEvents;
 		if(!is_array($r)) 
 			$r=array();
@@ -214,7 +218,7 @@ class TrendDetection extends BurstyDetection
 	 * @return object
 	 */
 	protected function cacheAnalysis($result){
-		smongo::$db->analysis->insert($result);
+		$this->db->analysis->insert($result);
 		return $result;
 	}
 
@@ -229,7 +233,7 @@ class TrendDetection extends BurstyDetection
 		// one more criteria should be added for user authorization.
 		// Analysis request may come from different users for different 
 		// domain, source etc. 
-		return smongo::$db->analysis->findOne(array(
+		return $this->db->analysis->findOne(array(
 			"date"=>date('Y-m-d H:i:s',$this->presentEnd),
 			"interval"=>$this->intervalName
 		));
@@ -242,7 +246,7 @@ class TrendDetection extends BurstyDetection
 	 * @return array
 	 */
 	public function getListOfCachedAnalyses(){
-		$r=smongo::$db->analysis->find(
+		$r=$this->db->analysis->find(
 			array(),
 			array('interval'=>1,'date'=>1)
 		);
@@ -264,7 +268,7 @@ class TrendDetection extends BurstyDetection
 	 * @return object
 	 */
 	public function getCachedAnalysis($analysisId){
-		$a = smongo::$db->analysis->findOne(
+		$a = $this->db->analysis->findOne(
 			array('_id'=>new MongoID($analysisId))
 		);
 		
@@ -286,7 +290,7 @@ class TrendDetection extends BurstyDetection
 	 */
 	public function getEventOfAnalysis($analysisId, $eventId){
 
-		$a=smongo::$db->analysis->findOne(
+		$a=$this->db->analysis->findOne(
 			array(
 				'_id'=>new MongoID($analysisId)
 			)
@@ -325,8 +329,4 @@ class TrendDetection extends BurstyDetection
 		unset($r->_id);
 		return (array)$r;
 	}
-	
-
 }
-
-?>

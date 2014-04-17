@@ -1,0 +1,21 @@
+{
+
+    "name": "botego/trendAnalysis",
+    "description": "trend analysis tool",
+    "authors": [
+        {
+            "name": "muatik",
+            "email": "muatik@gmail.com"
+        } 
+    ],
+    "require" : {
+		"silex/silex" : "~1.0",
+		"doctrine/mongodb" : "1.1.*@dev",
+		"filp/whoops" : "1.*",
+		"symfony/console" : "2.*",
+		"monolog/monolog" : "~1.7"
+    },
+	"autoload": {
+        "psr-0": {"TrendAnalysis": ["src/"]}
+    }
+}

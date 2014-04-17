@@ -1,5 +1,7 @@
 <?php
-require_once('main.php');
+namespace TrendAnalysis\Trends;
+
+use TrendQueueStatus;
 
 /**
  * The queue system for the trend analyzer
@@ -39,9 +41,15 @@ require_once('main.php');
  * @version $id$
  * @author Mustafa Atik <muatik@gmail.com>
  */
-class trendQueue
+class TrendQueue
 {
 
+	public function __construct($db) 
+	{
+
+		$this->$db = $db;
+
+	}
 	/**
 	 * adds a job into the queue. Every new job's status is 'waiting'.
 	 * 
@@ -62,7 +70,7 @@ class trendQueue
 		
 		$n = array(
 			'at' => time(),
-			'status' => trendQueueStatus::$waiting,
+			'status' => TrendQueueStatus::$waiting,
 			'date' => $date,
 			'interval' => $interval,
 			'criteria' => $criteria
@@ -71,7 +79,7 @@ class trendQueue
 		if($callback !=null)
 			$n['callback'] = $callback;
 
-		smongo::$db->queue->insert($n);
+		$this->db->queue->insert($n);
 		return $n;
 	}
 
@@ -88,8 +96,8 @@ class trendQueue
 	 */
 	public static function isThere($date, $interval, $criteria = array()){
 		
-		return smongo::$db->queue->findOne(array(
-			'status'=>array('$ne'=>trendQueueStatus::$cancelled),
+		return $this->db->queue->findOne(array(
+			'status'=>array('$ne'=>TrendQueueStatus::$cancelled),
 			'date'=>$date,
 			'interval'=> $interval,
 			'criteria'=> $criteria
@@ -114,7 +122,7 @@ class trendQueue
 		$n['status'] = $status;
 		$n['changed'] = time();
 
-		smongo::$db->queue->save($n);
+		$this->db->queue->save($n);
 	}
 
 
@@ -127,7 +135,7 @@ class trendQueue
 	 * @return void
 	 */
 	public static function get($id){
-		return smongo::$db->queue->findOne(
+		return $this->db->queue->findOne(
 			array('_id' => new MongoID($id))
 		);
 	}
@@ -141,7 +149,7 @@ class trendQueue
 	 * @return boolean
 	 */
 	public static function update($job){
-		return smongo::$db->queue->save($job);
+		return $this->db->queue->save($job);
 	}
 
 	/**
@@ -159,37 +167,7 @@ class trendQueue
 		if($status != null)
 			$filter['status'] = $status;
 
-		return smongo::$db->queue->find($filter);
+		return $this->db->queue->find($filter);
 	}
 
 }
-
-
-/**
- * The list of status for the queue system.
- * 
- * @author Mustafa Atik <muatik@gmail.com>
- */
-class trendQueueStatus
-{
-
-	public static $waiting = 'waiting';
-	public static $completed = 'completed';
-	public static $cancelled= 'cancelled';
-	public static $running = 'running';
-	public static $inProgress= 'inProgress';
-	
-	public static function get(){
-		return array(
-			'waiting',
-			'cancelled',
-			'running',
-			'inProgress',
-			'completed'
-		);
-	}
-
-}
-
-
-?>

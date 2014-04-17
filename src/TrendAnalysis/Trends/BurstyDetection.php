@@ -1,6 +1,9 @@
 <?php
-require_once('main.php');
 
+namespace TrendAnalysis\Trends;
+
+use TrendAnalysis\Stream\Stream;
+use TrendAnalysis\Libs\Tokenization;
 
 /**
  * BurstyDetection
@@ -495,9 +498,5 @@ class BurstyDetection
 		$this->detectBurstyEvents();
 		
 		return $this->burstyEvents;
-	}
-
-	
+	}	
 }
-
-?>

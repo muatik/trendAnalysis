@@ -61,6 +61,18 @@ $app['db.mongodb'] = $app->share(function($app) {
 	return $db;
 });
 
+
+$app['stream'] = $app->share(function ($app){
+	$stream = false;
+	if ($app['streamType']=='local'){
+		$stream = new TrendAnalysis\Stream\MongoStream();
+		$stream::init($app['db.mongodb']);
+	}else if ($app['streamType']=='sparql')
+		$stream = new TrendAnalysis\Stream\Stream();
+	
+	return $stream;
+});
+
 require ROOT.'src/TrendAnalysis/router.php';
 
 return $app;

@@ -33,3 +33,6 @@ $app['logging.handler'] = 'mongodb';
 $app['logging.db.databaseName'] = $app['db.config.mongodb']['database'];
 $app['logging.db.collectionName'] = 'log';
 $app['logging.level'] = 'DEBUG';
+
+
+$app['streamType'] = 'local'; // local or sparql

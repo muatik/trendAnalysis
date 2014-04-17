@@ -1,5 +1,7 @@
 <?php
 
+namespace TrendAnalysis\Libs;
+
 class Tokenization
 {
 
@@ -47,8 +49,4 @@ class Tokenization
 
 		return $tokens;
 	}
-
-
 }
-
-?>

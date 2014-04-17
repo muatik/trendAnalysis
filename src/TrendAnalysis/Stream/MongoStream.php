@@ -1,13 +1,21 @@
 <?php
-require_once('main.php');
 
-class Stream
+namespace TrendAnalysis\Stream;
+
+class MongoStream
 {
 
 	public static $table='content_sample';
 
+	private static $db = null;
+
+	public static function init($db)
+	{
+		self::$db = $db;
+	}
+
 	public static function get($criteria, $asArray=1){
-		$docs = smongo::$db->stream->find(
+		$docs = self::$db->stream->find(
 			$criteria,
 			array('id'=>1,'text'=>1,'created_at')
 		);
@@ -28,7 +36,7 @@ class Stream
 
 		$criteria['keyword']=$domain;
 
-		$res=smongo::$db->command(array(
+		$res=self::$db->command(array(
 			'mapreduce'=>$collection,
 			'map'=>$map,
 			'reduce'=>$reduce,
@@ -36,7 +44,7 @@ class Stream
 			'out'=>array('merge'=>'hourly'.$collection)
 		));
 
-		return smongo::$db->mpHourlyVolume->find();
+		return self::$db->mpHourlyVolume->find();
 	}
 
 	public static function getVolume($domain, $date=null, $term=null){
@@ -50,7 +58,7 @@ class Stream
 		$map=new MongoCode( file_get_contents('resources/mapStreamByYMDH.js') );
 		$reduce=new MongoCode( file_get_contents('resources/reduceStreamBySumming.js') );
 
-		$res=smongo::$db->command(array(
+		$res=self::$db->command(array(
 			'mapreduce'=>'stream',
 			'map'=>$map,
 			'reduce'=>$reduce,
@@ -69,7 +77,7 @@ class Stream
 	public static function getDomainVolume($domain){
 		
 		$criteria=array('value.d'=>$domain);
-		$res=smongo::$db->hourlystream->find( $criteria );
+		$res=self::$db->hourlystream->find( $criteria );
 
 		$list=array();
 		foreach($res as $i)
@@ -88,10 +96,7 @@ class Stream
 
 		if($term!=null)	$criteria['text']=$term;
 		
-		return smongo::$db->stream->find( $criteria )->limit($limit);
+		return self::$db->stream->find( $criteria )->limit($limit);
 		
 	}
-	
 }
-
-?>
