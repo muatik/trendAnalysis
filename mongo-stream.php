@@ -6,11 +6,13 @@ class Stream
 
 	public static $table='content_sample';
 
-	public static function get($criteria){
-		return smongo::$db->stream->find(
+	public static function get($criteria, $asArray=1){
+		$docs = smongo::$db->stream->find(
 			$criteria,
 			array('id'=>1,'text'=>1,'created_at')
 		);
+		
+		return ($asArray? iterator_to_array($docs) : $docs);
 	}
 
 	public static function mapreduceHourlyVolume($collection, $domain, $startDate, $endDate){

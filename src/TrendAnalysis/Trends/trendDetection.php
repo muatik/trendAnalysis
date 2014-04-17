@@ -37,7 +37,7 @@ class TrendDetection extends BurstyDetection
 	
 	public function __construct(){
 		parent::__construct();
-		$this->dummyStatistics=json_decode(file_get_contents('dummyStatistics.json'));
+		$this->dummyStatistics=json_decode(file_get_contents('../dummyStatistics.json'));
 	}
 	
 	/**
@@ -50,7 +50,7 @@ class TrendDetection extends BurstyDetection
 	 * @return array
 	 */
 	protected function fetchStream($streamCriteria){
-		return iterator_to_array(stream::get($streamCriteria));
+		return stream::get($streamCriteria);
 	}
 
 	/**
@@ -146,8 +146,11 @@ class TrendDetection extends BurstyDetection
 	protected function prepareResult(){
 		$o=new Stdclass();
 		$r=$this->burstyEvents;
+		if(!is_array($r)) 
+			$r=array();
+		
 		$dateFormat='Y-m-d H:i:s';
-
+		
 		$o->interval=$this->intervalName;
 		//$o->language;
 		//$o->language;
@@ -162,6 +165,9 @@ class TrendDetection extends BurstyDetection
 			'dateStart'=>date($dateFormat,$this->pastStart),
 			'dateEnd'=>date($dateFormat,$this->pastEnd)
 		);
+		
+		if($this->getLastError() !== '')
+			$o->error = $this->getLastError();
 		
 		$o->entries=array();
 		$eventId=0;
@@ -243,7 +249,7 @@ class TrendDetection extends BurstyDetection
 
 		$r=iterator_to_array($r);
 		foreach($r as $k=>$i){
-			$r[$k]['analysis_id']=(string)$i['_id'];
+			$r[$k]['id']=(string)$i['_id'];
 			unset($r[$k]['_id']);
 		}
 
@@ -258,9 +264,16 @@ class TrendDetection extends BurstyDetection
 	 * @return object
 	 */
 	public function getCachedAnalysis($analysisId){
-		return smongo::$db->analysis->findOne(
+		$a = smongo::$db->analysis->findOne(
 			array('_id'=>new MongoID($analysisId))
 		);
+		
+		if($a) {
+			$a['id'] = (string)$a['_id'];
+			unset($a['_id']);
+		}
+
+		return $a;
 	}
 
 	/**
@@ -297,19 +310,20 @@ class TrendDetection extends BurstyDetection
 	 * @return array
 	 */
 	public function detect(){
+		/*
 		$cache=$this->isAnalysisCached();
 		if($cache)
 			return $cache;
-		
+*/
 		$r=parent::detect();
 		$r=$this->prepareResult();
 		
 		// saving the result of detection into the database for caching
 		$r=$this->cacheAnalysis($r);
 		
-		$r->analysis_id=(string)$r->_id;
+		$r->id=(string)$r->_id;
 		unset($r->_id);
-		return $r;
+		return (array)$r;
 	}
 	
 

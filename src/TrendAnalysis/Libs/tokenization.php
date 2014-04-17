@@ -14,7 +14,7 @@ class Tokenization
 	 * @return void
 	 */
 	public static function tokenize($text){
-		preg_match_all('#\w+#',$text,$m);
+		preg_match_all('#\p{L}+#u',$text,$m);
 		return $m[0];
 		return preg_split(
 			'/'.self::$pattern.'/i', // pattern

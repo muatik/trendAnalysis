@@ -7,6 +7,7 @@ require_once('libs/smongo.php');
 require_once('libs/arrays.php');
 require_once('libs/tokenization.php');
 require_once('stream.php');
+//require_once('mongo-stream.php');
 
 MongoCursor::$timeout = -1;
 

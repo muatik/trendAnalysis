@@ -1,6 +1,7 @@
 <?php
 header("Content-Type:text/plain;charset=utf-8");
 
+require_once("../trendQueue.php");
 require_once("../trendDetection.php");
 class trendApi{
 
@@ -12,14 +13,41 @@ class trendApi{
 
 		case 'startAnalysisInterval':
 
-				if (isset($r['interval'],$r['date'])){
+			if (isset($r['interval'],$r['date'])){
+
+				$criteria = array();
+
+				if(isset($r['ma']))
+					$criteria = array('ma'=>$r['ma']);
+			
+				if(isset($r['queue']) && $r['queue'] == 1){
 					
-					if (isset($r['ma']))
-						$td->setStreamCriteria(array('ma'=>$r['ma']));
-						
+					$job = trendQueue::add(
+						$r['date'], 
+						$r['interval'], 
+						$criteria,
+						(isset($r['callback']) ? $r['callback'] : null )
+					);
+
+					// if the job was already there and completed, 
+					// return the analysis result related this job.
+					if($job['status'] == trendQueueStatus::$completed)
+						echo json_encode($td->getCachedAnalysis($job['analysisId']));
+					else{
+						$job['id'] = (string)$job['_id'];
+						unset($job['_id']);
+						$job['description'] = 'The job has been inserted into the queue.';
+						echo json_encode($job);
+					}
+					
+				}
+				else{
+					$td->setStreamCriteria($criteria);				
 					$td->setAnalysisInterval($r['interval'],$r['date']);
 					echo json_encode($td->detect());
 				}
+
+			}
 
 			break;
 
@@ -42,7 +70,7 @@ class trendApi{
 			break;
 
 			default: 
-				echo "parameters are required";die();
+				echo "required parameters not found";die();
 			break;
 		}
 	}
