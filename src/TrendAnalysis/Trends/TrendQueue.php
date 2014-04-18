@@ -1,7 +1,7 @@
 <?php
 namespace TrendAnalysis\Trends;
 
-use TrendQueueStatus;
+use \MongoID;
 
 /**
  * The queue system for the trend analyzer
@@ -44,11 +44,11 @@ use TrendQueueStatus;
 class TrendQueue
 {
 
-	public function __construct($db) 
+	private static $db = null;
+
+	public static function init($db)
 	{
-
-		$this->$db = $db;
-
+		self::$db = $db;
 	}
 	/**
 	 * adds a job into the queue. Every new job's status is 'waiting'.
@@ -79,7 +79,7 @@ class TrendQueue
 		if($callback !=null)
 			$n['callback'] = $callback;
 
-		$this->db->queue->insert($n);
+		self::$db->queue->insert($n);
 		return $n;
 	}
 
@@ -96,7 +96,7 @@ class TrendQueue
 	 */
 	public static function isThere($date, $interval, $criteria = array()){
 		
-		return $this->db->queue->findOne(array(
+		return self::$db->queue->findOne(array(
 			'status'=>array('$ne'=>TrendQueueStatus::$cancelled),
 			'date'=>$date,
 			'interval'=> $interval,
@@ -122,7 +122,7 @@ class TrendQueue
 		$n['status'] = $status;
 		$n['changed'] = time();
 
-		$this->db->queue->save($n);
+		self::$db->queue->save($n);
 	}
 
 
@@ -135,7 +135,7 @@ class TrendQueue
 	 * @return void
 	 */
 	public static function get($id){
-		return $this->db->queue->findOne(
+		return self::$db->queue->findOne(
 			array('_id' => new MongoID($id))
 		);
 	}
@@ -149,7 +149,7 @@ class TrendQueue
 	 * @return boolean
 	 */
 	public static function update($job){
-		return $this->db->queue->save($job);
+		return self::$db->queue->save($job);
 	}
 
 	/**
@@ -167,7 +167,7 @@ class TrendQueue
 		if($status != null)
 			$filter['status'] = $status;
 
-		return $this->db->queue->find($filter);
+		return self::$db->queue->find($filter);
 	}
 
 }

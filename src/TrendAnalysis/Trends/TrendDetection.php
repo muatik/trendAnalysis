@@ -38,11 +38,20 @@ class TrendDetection extends BurstyDetection
 	 */
 	protected $streamCriteria;
 	
-	public function __construct($db, $stream){
-		parent::__construct();
+	public function __construct($db, $stream, $logging){
+
+		$this->logging = $logging;
+		$this->logging->addDebug('--------The Analyzer started---------');
+		parent::__construct($logging);
+
 		$this->db = $db;
 		$this->stream = $stream;
-		$this->dummyStatistics=json_decode(file_get_contents('../resources/dummy/dummyStatistics.json'));
+
+		$dummyFile = __DIR__.'/../../../resources/dummy/dummyStatistics.json';
+		if (file_exists($dummyFile))
+			$this->dummyStatistics=json_decode(file_get_contents($dummyFile));
+		else
+			$this->dummyStatistics='';		
 	}
 	
 	/**
@@ -54,7 +63,8 @@ class TrendDetection extends BurstyDetection
 	 * @access protected
 	 * @return array
 	 */
-	protected function fetchStream($streamCriteria){
+	protected function fetchStream($streamCriteria)
+	{
 		return $this->stream->get($streamCriteria);
 	}
 
@@ -66,7 +76,11 @@ class TrendDetection extends BurstyDetection
 	 * @access public
 	 * @return void
 	 */
-	public function setStreamCriteria($criteria){
+	public function setStreamCriteria($criteria)
+	{
+		if (isset($criteria['ma']))
+			$this->logging->addDebug('monitoring activity:'.json_encode($criteria['ma']));
+
 		$this->streamCriteria=$criteria;
 	}
 
@@ -79,20 +93,20 @@ class TrendDetection extends BurstyDetection
 	 * @access protected
 	 * @return void
 	 */
-	public function setAnalysisInterval($interval, $date){
-		
+	public function setAnalysisInterval($interval, $sdate){
 		$this->intervalName=$interval;
 		
-		$date=strtotime($date);
+		$date=strtotime($sdate);
 		
 		if($interval=='hourly'){
+			$this->logging->addDebug('setting analysis interval: hourly '.$sdate);
 			$this->thresholdChi=1.5;
 			$this->thresholdRatio=0.009;
 			$this->frameLength=3600*1; // 1 hour
 			$this->frameDistance=3600*24; // 24 hours
 			
-			$this->sampleLength=60*5; // 5 minutes
-			$this->sampleDistance=60*10; // 10 minutes
+			$this->sampleLength=60*5; // 60 minutes, old value 5
+			$this->sampleDistance=60*0; // 0 minutes, because of low amount of data in LDS, old value 10
 
 			$this->presentEnd=$date;
 			$this->presentStart=$this->presentEnd-($this->frameLength); // 1 hour
@@ -102,11 +116,12 @@ class TrendDetection extends BurstyDetection
 			
 		} elseif ($interval=='daily') {
 
+			$this->logging->addDebug('setting analysis interval: daily '.$sdate);
 			$this->frameLength=3600*24; // 24 hours
 			$this->frameDistance=3600*24; // same as the frame length for no distance
 			
-			$this->sampleLength=60*5; // 5 minutes
-			$this->sampleDistance=60*30; // 30 minutes
+			$this->sampleLength=60*240; // 240 minutes
+			$this->sampleDistance=60*0; // 0 minutes, because of low amount of data in LDS
 
 			$this->presentEnd=$date;
 			$this->presentStart=$this->presentEnd-($this->frameLength); // 24 hours
@@ -115,6 +130,7 @@ class TrendDetection extends BurstyDetection
 			$this->pastStart=$this->presentEnd-(3600*24*8); // 8 days
 		} elseif ($interval=='weekly') {
 
+			$this->logging->addDebug('setting analysis interval: weekly '.$sdate);
 			$this->frameLength=3600*24*7; // 7 days
 			$this->frameDistance=3600*24*7; // same as the frame length for no distance
 			
@@ -128,11 +144,12 @@ class TrendDetection extends BurstyDetection
 			$this->pastStart=$this->presentEnd-(3600*24*7*4); // 4 weeks
 		} elseif ($interval=='monthly') {
 
-			$this->frameLength=3600*24*30; // 7 days
+			$this->logging->addDebug('setting analysis interval: monthly '.$sdate);
+			$this->frameLength=3600*24*30; // 30 days
 			$this->frameDistance=3600*24*30; // same as the frame length for no distance
 			
-			$this->sampleLength=60*10; //  10 minutes
-			$this->sampleDistance=3600*6; // 6 hours
+			$this->sampleLength=60*120; //  120 minutes
+			$this->sampleDistance=3600*12; // 12 hours
 
 			$this->presentEnd=$date;
 			$this->presentStart=$this->presentEnd-($this->frameLength); // 1 month
@@ -149,7 +166,8 @@ class TrendDetection extends BurstyDetection
 	 * @return object
 	 */
 	protected function prepareResult(){
-		$o=new \stdClass();
+		$this->logging->addDebug('preparing the result');
+		$o=new stdClass();
 		$r=$this->burstyEvents;
 		if(!is_array($r)) 
 			$r=array();
@@ -219,6 +237,7 @@ class TrendDetection extends BurstyDetection
 	 * @return object
 	 */
 	protected function cacheAnalysis($result){
+		$this->logging->addDebug('caching the result of the analysis');
 		$this->db->analysis->insert($result);
 		return $result;
 	}
@@ -247,6 +266,9 @@ class TrendDetection extends BurstyDetection
 	 * @return array
 	 */
 	public function getListOfCachedAnalyses(){
+
+		$this->loggin->addDebug('getting list of cached analysis');
+
 		$r=$this->db->analysis->find(
 			array(),
 			array('interval'=>1,'date'=>1)

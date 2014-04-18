@@ -25,8 +25,9 @@ class MongoStream
 
 	public static function mapreduceHourlyVolume($collection, $domain, $startDate, $endDate){
 		
-		$map=new MongoCode( file_get_contents('resources/mapStreamByYMDH.js') );
-		$reduce=new MongoCode( file_get_contents('resources/reduceStreamBySumming.js') );
+		$dir = __DIR__.'/../../../resources/dummy/';
+		$map=new MongoCode( file_get_contents($dir.'mapStreamByYMDH.js') );
+		$reduce=new MongoCode( file_get_contents($dir.'reduceStreamBySumming.js') );
 		
 		$criterias=array();
 		
@@ -55,8 +56,9 @@ class MongoStream
 
 		if($term!=null)	$criteria['text']=$term;
 
-		$map=new MongoCode( file_get_contents('resources/mapStreamByYMDH.js') );
-		$reduce=new MongoCode( file_get_contents('resources/reduceStreamBySumming.js') );
+		$dir = __DIR__.'/../../../resources/dummy/';
+		$map=new MongoCode( file_get_contents($dir.'mapStreamByYMDH.js') );
+		$reduce=new MongoCode( file_get_contents($dir.'reduceStreamBySumming.js') );
 
 		$res=self::$db->command(array(
 			'mapreduce'=>'stream',

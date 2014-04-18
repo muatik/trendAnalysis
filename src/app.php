@@ -61,6 +61,20 @@ $app['db.mongodb'] = $app->share(function($app) {
 	return $db;
 });
 
+$app['logging'] = $app->share(function($app) {
+
+	$logger = new Logger('TrendAnalysis');
+	$mongoHandler = new MongoDBHandler(
+		$app['db.mongodb.getConnection'], 
+		$app['logging.db.databaseName'],
+		$app['logging.db.collectionName']
+	);
+	
+	$level = constant('\Monolog\Logger::'.$app['logging.level']);
+	$logger->pushHandler($mongoHandler, $level);
+	return $logger;
+});
+
 
 $app['stream'] = $app->share(function ($app){
 	$stream = false;

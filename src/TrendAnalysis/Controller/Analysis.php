@@ -33,8 +33,8 @@ class Analysis implements ControllerProviderInterface
 	public function startAnalysisInterval(Application $app, $interval, $date) 
 	{
 		$response = new Response();
-
-		$TrendDetection=new TrendDetection($app['db.mongodb'], $app['stream']);
+		TrendQueue::init($app['db.mongodb']);
+		$TrendDetection=new TrendDetection($app['db.mongodb'], $app['stream'], $app['logging']);
 
 		if (isset($interval,$date)){
 
@@ -81,7 +81,7 @@ class Analysis implements ControllerProviderInterface
 	public function getListOfCachedAnalysesList(Application $app) 
 	{
 		$response = new Response();
-		$TrendDetection=new TrendDetection($app['stream']);
+		$TrendDetection=new TrendDetection($app['db.mongodb'], $app['stream'], $app['logging']);
 		$response->setData('list', $TrendDetection->getListOfCachedAnalyses());
 
 		return $app->json($response);
@@ -90,7 +90,7 @@ class Analysis implements ControllerProviderInterface
 	public function getListOfCachedAnalyses(Application $app, $analysisId) 
 	{
 		$response = new Response();
-		$TrendDetection=new TrendDetection($app['stream']);
+		$TrendDetection=new TrendDetection($app['db.mongodb'], $app['stream'], $app['logging']);
 		$response->setData('analysis', $TrendDetection->getCachedAnalysis($analysisId));
 		return $app->json($response);
 	}
@@ -98,7 +98,7 @@ class Analysis implements ControllerProviderInterface
 	public function getEventOfAnalyses(Application $app, $analysisId, $eventId) 
 	{
 		$response = new Response();
-		$TrendDetection=new TrendDetection($app['stream']);
+		$TrendDetection=new TrendDetection($app['db.mongodb'], $app['stream'], $app['logging']);
         $response->setData('eventAnalysis', $TrendDetection->getEventOfAnalysis($analysisId, $eventId));
 		return $app->json($response);
 	}

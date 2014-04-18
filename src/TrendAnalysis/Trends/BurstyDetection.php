@@ -213,8 +213,9 @@ class BurstyDetection
 	 */
 	protected $error;
 
-	public function __construct(){
+	public function __construct($logging){
 	
+		$this->logging = $logging;
 		/**
 		 * For the default values, it is going to be hourly analysis for
 		 * the current time.
@@ -325,28 +326,43 @@ class BurstyDetection
 		return $stream=Stream::get($criteria);
 	}
 
+	protected function dumpData($title, $data) {
+		return false;
+		$x = new stdClass();
+		$x->title =$title;
+		$x->data = $data;
+		
+		file_put_contents('/var/www/botego.net/subdomains/trend/v1/datadump.txt', json_encode($x).',', FILE_APPEND);
+	}
+
 	protected function prepareFrameData(){
+
+		$this->logging->addDebug('fetching data');
 
 		$frame=$this->sampleTimes['present'][0];
 		$stream=$this->fetchFrameStream($frame);
 		if($stream===false)
+			$this->logging->addError('data for the present frame cannot be fetched. '.stream::getLastError());
 			return $this->logError(
 				'data for the present frame cannot be fetched. '.stream::getLastError()
 			);
 		
 		$this->streamVolume['present']= count($stream);
-		if($this->streamVolume['present']<100)
-			return $this->logError(
-				'insufficient data for the present frame '.
+		if($this->streamVolume['present']<10) {
+			$error = 'insufficient data for the present frame '.
 				$frame[0]['end'].' - '.$frame[count($frame)-1]['start'].
-				'. '.$this->streamVolume['present'].' documents found.'
-			);
-		
+				'. '.$this->streamVolume['present'].' documents found. The analyzer needs 10 documents at least.';
+			
+			$this->logging->addError($error);
+			return $this->logError($error);
+		}
+
+		$this->logging->addDebug('the amount of the data in the present frame : '.$this->streamVolume['present']);	
 		$this->tokens['present']=Tokenization::produceTFList($stream);
 		
 		$present=array();
 		foreach($stream as $i){
-			$i['text']=trim(preg_replace('#(@\w+)|(^RT)|:#ui','',$i['text']));
+			$i['text']=trim(preg_replace('#(^RT)|:#ui','',$i['text']));
 			$found=false;
 			foreach($present as $k=>$j)
 				if($i['text']==$j['text']){
@@ -373,19 +389,30 @@ class BurstyDetection
 		foreach($this->sampleTimes['past'] as $frame){
 			
 			$stream=$this->fetchFrameStream($frame);
-			if($stream===false)
-				return $this->logError(
-					'data for the past frame cannot be fetched. '.stream::getLastError()
-			);
+			if($stream===false) {
+				$error = 'data for the past frame cannot be fetched. '.stream::getLastError();
+				$this->logging->addError($error);
+				return $this->logError($error);
+			}
 			
 			$frameCount=count($stream);
 			$this->streamVolume['pastFrames'][]=$frameCount;
-			if($frameCount<50)
-				return $this->logError(
-					'insufficient data for the past frame '.
+			
+			$this->logging->addDebug('the amount of the data in the past frame '
+				.$frame[0]['end'].' - '.$frame[count($frame[1])]['end']
+				.' : '.$frameCount);
+
+			if($frameCount<10) {
+				$error = 'insufficient data in the past frame '.
 					$frame[0]['end'].' - '.$frame[count($frame[1])]['end'].
-					'. '.$frameCount.' documents found.'
-				);
+					'. '.$frameCount.' documents found';
+				
+				$this->logging->addError($error);
+				// return $this->logError($error);
+			}
+		
+			$this->dumpData(
+				'past: '.$frame[0]['end'].' - '.$frame[count($frame[1])]['end'], $stream);
 
 			$this->tokens['pastFrames'][]= Tokenization::produceTFList($stream);
 		}
@@ -394,6 +421,9 @@ class BurstyDetection
 	}
 
 	protected function detectBurstyTerms(){
+
+		$debugData = array();
+		$debugCounter = 0;
 
 		foreach($this->tokens['present'] as $token=>$tokenFrequency){
 
@@ -413,11 +443,12 @@ class BurstyDetection
 					$pastRatio[]=$frameTokens[$token] / $frameVolume;
 				}
 
+
 			
 			if(count($pastRatio)>0)
 				$avgRatio=array_sum($pastRatio)/count($this->tokens['pastFrames']);
 			else
-				$avgRatio=0.000001;
+				$avgRatio=0.0001;
 
 			$presentRatio=$tokenFrequency/$this->streamVolume['present'];
 			
@@ -437,8 +468,22 @@ class BurstyDetection
 					'chi-value'=>$chi,
 				);
 
+			if ($debugCounter<30) {
+				$debugData[]=array(
+					'term'=>$token,
+					'streamVolume'=>$this->streamVolume['present'],
+					'presentFrequency'=>$tokenFrequency,
+					'pastFrequency'=>$pastFrequency,
+					'pastRatio'=>$pastRatio,
+					'presentRatio'=>$presentRatio,
+					'chi-value'=>$chi,
+				);
+			}
+			$debugCounter++;
 		}
-
+		
+		$this->dumpData('present terms', $debugData);
+		
 		$this->burstyTerms= Arrays::usort(
 			$this->burstyTerms, 'presentFrequency', 'desc'
 		);
@@ -446,10 +491,13 @@ class BurstyDetection
 
 	protected function detectBurstyEvents(){
 		
+		$this->dumpData('emerging terms', array_slice($this->burstyTerms, 0, 30));
+
 		$burstyTerms=array();
 		foreach($this->burstyTerms as $i)
 			$burstyTerms[]=$i['term'];
-		
+
+
 		while(count($burstyTerms)>0){
 			$mostSimilar=null;
 			$highestScore=0;
@@ -487,11 +535,14 @@ class BurstyDetection
 
 		} // end of while
 
+		$this->burstyEvents = array_slice($this->burstyEvents, 0, 30);
+
 	}
 
 	public function detect(){
 		$this->init();
-		
+		//Log::d('samples: '.json_encode($this->sampleTimes));
+
 		if($this->prepareFrameData()==false)
 			return false;
 
@@ -499,5 +550,5 @@ class BurstyDetection
 		$this->detectBurstyEvents();
 		
 		return $this->burstyEvents;
-	}	
+	}
 }
