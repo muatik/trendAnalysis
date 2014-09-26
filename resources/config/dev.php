@@ -8,8 +8,6 @@ $app['resources_path'] = realpath(ROOT.'/resources/');
 /**
  * DATA STORAGE CONFIGURATIONS
  * ------------------------------------------------------------------
- * This section sets where the application will save its data such 
- * as topics, streams, users' configurations, alarms etc.
  */
 
 // For MongoDB, configure and comment out the following set:
@@ -36,3 +34,7 @@ $app['logging.level'] = 'DEBUG';
 
 
 $app['streamType'] = 'local'; // local or sparql
+
+// SPARQL CONFIGURATIONS
+// This is the url of the sparql end point. You may need to change this.
+$app['sparqlEndPoint'] = 'http://srvgal100.deri.ie:8080/l2m/query?query=';

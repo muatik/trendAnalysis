@@ -15,26 +15,26 @@ class Analysis implements ControllerProviderInterface
 	{
 		$index = $app['controllers_factory'];
 
-		$index->get('/startAnalysis/{interval}/{date}', 
+		$index->get('/{interval}/{date}',
 			array($this, 'startAnalysisInterval'));
 
-		$index->get('/cachedAnalyses', 
+		$index->get('/cached',
 			array($this, 'getListOfCachedAnalysesList'));
 
-		$index->get('/cachedAnalyses/{analysisId}', 
+		$index->get('/{analysisId}',
 			array($this, 'getListOfCachedAnalyses'));
 
-		$index->get('/analyses/{analysisId}/events/{eventId}', 
+		$index->get('/{analysisId}/events/{eventId}',
 			array($this, 'getEventOfAnalyses'));
 
 		return $index;
 	}
 
-	public function startAnalysisInterval(Application $app, $interval, $date) 
+	public function startAnalysisInterval(Application $app, $interval, $date)
 	{
 		$response = new Response();
 		TrendQueue::init($app['db.mongodb']);
-		$TrendDetection=new TrendDetection($app['db.mongodb'], $app['stream'], $app['logging']);
+		$TrendDetection = new TrendDetection($app['db.mongodb'], $app['stream'], $app['logging']);
 
 		if (isset($interval,$date)){
 
@@ -55,7 +55,7 @@ class Analysis implements ControllerProviderInterface
 					(empty($callback) ? null : $callback)
 				);
 
-				// if the job was already there and completed, 
+				// if the job was already there and completed,
 				// return the analysis result related this job.
 				if($job['status'] == TrendQueueStatus::$completed)
 				        $response->setData($TrendDetection->getCachedAnalysis($job['analysisId']));
@@ -78,16 +78,16 @@ class Analysis implements ControllerProviderInterface
 		return $app->json($response);
 	}
 
-	public function getListOfCachedAnalysesList(Application $app) 
+	public function getListOfCachedAnalysesList(Application $app)
 	{
 		$response = new Response();
-		$TrendDetection=new TrendDetection($app['db.mongodb'], $app['stream'], $app['logging']);
-		$response->setData('list', $TrendDetection->getListOfCachedAnalyses());
+		$trendDetection = new TrendDetection($app['db.mongodb'], $app['stream'], $app['logging']);
+		$response->setData('list', $trendDetection->getListOfCachedAnalyses());
 
 		return $app->json($response);
 	}
 
-	public function getListOfCachedAnalyses(Application $app, $analysisId) 
+	public function getListOfCachedAnalyses(Application $app, $analysisId)
 	{
 		$response = new Response();
 		$TrendDetection=new TrendDetection($app['db.mongodb'], $app['stream'], $app['logging']);
@@ -95,7 +95,7 @@ class Analysis implements ControllerProviderInterface
 		return $app->json($response);
 	}
 
-	public function getEventOfAnalyses(Application $app, $analysisId, $eventId) 
+	public function getEventOfAnalyses(Application $app, $analysisId, $eventId)
 	{
 		$response = new Response();
 		$TrendDetection=new TrendDetection($app['db.mongodb'], $app['stream'], $app['logging']);

@@ -8,25 +8,25 @@ use TrendAnalysis\Libs\Arrays;
 
 /**
  * BurstyDetection
- * 
+ *
  * This class detects bursty terms and bursty events in a time frame.
- * A bursty term or a bursty event is a word or a text whose frequency 
+ * A bursty term or a bursty event is a word or a text whose frequency
  * is suddenly increasing in present time frame regarding past time frames.
- * 
- * No need for stopwords or language specific resources, parameters. The 
+ *
+ * No need for stopwords or language specific resources, parameters. The
  * algorithm can detect stopwords and eliminate them easily. But if a stopword,
  * for example "the" in English, emerges dramatically, this word will not be
  * considired as a stopword but a bursty term.
  *
- * @package 
+ * @package
  * @version $id$
- * @author Mustafa Atik <muatik@gmail.com> 
+ * @author Mustafa Atik <muatik@gmail.com>
  */
 class BurstyDetection
 {
 	/**
 	 * present start in unixtimestamp
-	 * 
+	 *
 	 * @var int
 	 * @access public
 	 */
@@ -34,7 +34,7 @@ class BurstyDetection
 
 	/**
 	 * present end in unixtimestamp
-	 * 
+	 *
 	 * @var int
 	 * @access public
 	 */
@@ -42,7 +42,7 @@ class BurstyDetection
 
 	/**
 	 * past start in unixtimestamp
-	 * 
+	 *
 	 * @var int
 	 * @access public
 	 */
@@ -50,39 +50,39 @@ class BurstyDetection
 
 	/**
 	 * past end in unixtimestamp
-	 * 
+	 *
 	 * @var int
 	 * @access public
 	 */
 	public $pastEnd;
-	
+
 	/**
 	 * frame length  in seconds
-	 * 
+	 *
 	 * @var int
 	 * @access public
 	 */
 	public $frameLength;
-	
+
 	/**
 	 * frame distance in seconds
-	 * 
+	 *
 	 * @var int
 	 * @access public
 	 */
 	public $frameDistance;
-	
+
 	/**
 	 * sample length in seconds
-	 * 
+	 *
 	 * @var int
 	 * @access public
 	 */
 	public $sampleLength;
 
 	/**
-	 * sample distance in seconds 
-	 * 
+	 * sample distance in seconds
+	 *
 	 * @var mixed
 	 * @access public
 	 */
@@ -94,14 +94,14 @@ class BurstyDetection
 	 * or written by females.
 	 *
 	 * This array's value must be set by subclass.
-	 * 
+	 *
 	 * @var array
 	 * @access protected
 	 */
 	protected $streamCriteria;
 
 	/**
-	 * stream is an array of text objects. 
+	 * stream is an array of text objects.
 	 * each object must have the property named "text"
 	 * [{"text":"..."}, {"text":"..."}, ...]
 	 *
@@ -111,34 +111,34 @@ class BurstyDetection
 	protected $stream;
 
 	/**
-	 * An array which holds volumes of time frames. 
+	 * An array which holds volumes of time frames.
 	 * [
 	 *  "present": 756,
 	 *  "past": [
 	 *    657, 789, 598, 752, ...
 	 *  ]
 	 * ]
-	 * 
+	 *
 	 * @var mixed
 	 * @access protected
 	 */
 	protected $streamVolume;
-	
+
 	/**
-	 * tokens is a multidimensional array comprised of words in stream. 
+	 * tokens is a multidimensional array comprised of words in stream.
 	 * Each word can appear in once. Each token/word has a frequency value
 	 * that represent how many times the word appeared in the stream.
 	 *
 	 * example:
 	 * [
 	 * 	"present": [ ["the":50], ["car":30], ["apple":42], ["banana":12] ]
-	 * 	"pastFrames": [ 
+	 * 	"pastFrames": [
 	 * 		[ ["the":48], ["car":30], ["apple":42], ["hello":46] ],
 	 * 		[ ["the":43], ["car":30], ["apple":42], ["house":42] ],
 	 * 		[ ["the":47], ["car":30], ["apple":42], ["life":42] ],
 	 * 	]
 	 * ]
-	 * 
+	 *
 	 * @var array
 	 * @access protected
 	 */
@@ -152,14 +152,14 @@ class BurstyDetection
 	 * 	 'term': "banana",
 	 * 	 'streamVolume': 134,
 	 * 	 'presentFrequency': 32,
-	 *	 'pastFrequency': [ 
-	 * 		['frequency': 2, 'frameVolume': 135],  
-	 * 		['frequency': 0, 'frameVolume': 114],  
+	 *	 'pastFrequency': [
+	 * 		['frequency': 2, 'frameVolume': 135],
+	 * 		['frequency': 0, 'frameVolume': 114],
 	 * 	 ]
-	 *	 'pastRatio': [ 
+	 *	 'pastRatio': [
 	 *		0.0148148,
-	 *		0.0 
-	 * 	 ], 
+	 *		0.0
+	 * 	 ],
 	 * 	 'presentRatio': 0.2388059,
 	 * 	 'chi-value': 7.22861811,
 	 *  ]
@@ -171,7 +171,7 @@ class BurstyDetection
 	protected $burstyTerms;
 
 	/**
-	 * an array comprised of stream text which are bursty.  
+	 * an array comprised of stream text which are bursty.
 	 *
 	 * [
 	 *  [
@@ -191,7 +191,7 @@ class BurstyDetection
 
 	/**
 	 * Threshold for chi-value. It's default value is 1.5
-	 * 
+	 *
 	 * @var mixed
 	 * @access protected
 	 */
@@ -199,22 +199,22 @@ class BurstyDetection
 
 	/**
 	 * Threshold for ratio. It's default value is 0.0009
-	 * 
+	 *
 	 * @var mixed
 	 * @access protected
 	 */
 	protected $thresholdRatio;
-	
+
 	/**
 	 * the latest occured error
-	 * 
+	 *
 	 * @var mixed
 	 * @access protected
 	 */
 	protected $error;
 
 	public function __construct($logging){
-	
+
 		$this->logging = $logging;
 		/**
 		 * For the default values, it is going to be hourly analysis for
@@ -223,14 +223,14 @@ class BurstyDetection
 
 		$this->frameLength=3600*1; // 1 hour
 		$this->frameDistance=3600*24; // 24 hours
-		
+
 		$this->sampleLength=60*5; // 5 minutes
 		$this->sampleDistance=60*10; // 10 minutes
 
 		$this->presentEnd=time()-3600*24*2; // right now
 		$this->presentEnd=strtotime(date('2013-02-11 15:00'));
 		$this->presentStart=$this->presentEnd-($this->frameLength); // 1 hour
-		
+
 		$this->pastEnd=$this->presentEnd-$this->frameDistance;
 		$this->pastStart=$this->presentEnd-(3600*24*7); // 7 days
 
@@ -239,14 +239,14 @@ class BurstyDetection
 		$this->thresholdChi=1.5;
 		$this->thresholdRatio=0.0009;
 	}
-	
+
 	public function init(){
 		$this->error = '';
 		$this->burstyTerms=array();
 		$this->streamVolumes=array();
 		$this->tokens=array();
-		
-		// the times of samples in frames are being created, 
+
+		// the times of samples in frames are being created,
 		// so data stream can be restricted with these times.
 		$this->sampleTimes['present']=$this->prepareTimeListOfSamples(
 			$this->presentStart,$this->presentEnd
@@ -259,8 +259,8 @@ class BurstyDetection
 
 	/**
 	 * logs the given error as the latest error
-	 * 
-	 * @param string $error 
+	 *
+	 * @param string $error
 	 * @access protected
 	 * @return false
 	 */
@@ -271,7 +271,7 @@ class BurstyDetection
 
 	/**
 	 * returns the latest error
-	 * 
+	 *
 	 * @access public
 	 * @return string
 	 */
@@ -287,7 +287,7 @@ class BurstyDetection
 			$list=array();
 			while(($sampleStart=$frameEnd-$this->sampleLength) >=$frameStart){
 				$list[]=array(
-					'start'=>date('Y-m-d H:i:00',$sampleStart), 
+					'start'=>date('Y-m-d H:i:00',$sampleStart),
 					'end'=>date('Y-m-d H:i:00', $frameEnd)
 				);
 				$frameEnd=$sampleStart-$this->sampleDistance;
@@ -298,10 +298,10 @@ class BurstyDetection
 		}
 		return $frames;
 	}
-	
+
 	protected function fetchFrameStream($timesOfFrame){
 		$criteria['$or']=array();
-		
+
 		foreach($timesOfFrame as $i)
 			$criteria['$or'][]=array('at'=> array(
 				'$gt'=>strtotime($i['start']), '$lt'=>strtotime($i['end'])
@@ -311,14 +311,14 @@ class BurstyDetection
 
 		return $this->fetchStream($criteria);
 	}
-	
+
 	/**
 	 * This method must be overridden by subclass according to stream source.
 	 * The return value must be an array that contains text objects of stream.
 	 *
-	 * [ {text:"..."}, {"text":"..."}, ... ] 
+	 * [ {text:"..."}, {"text":"..."}, ... ]
 	 *
-	 * @param array $criteria 
+	 * @param array $criteria
 	 * @access protected
 	 * @return array
 	 */
@@ -331,7 +331,7 @@ class BurstyDetection
 		$x = new stdClass();
 		$x->title =$title;
 		$x->data = $data;
-		
+
 		file_put_contents('/var/www/botego.net/subdomains/trend/v1/datadump.txt', json_encode($x).',', FILE_APPEND);
 	}
 
@@ -341,25 +341,28 @@ class BurstyDetection
 
 		$frame=$this->sampleTimes['present'][0];
 		$stream=$this->fetchFrameStream($frame);
-		if($stream===false)
+
+		if($stream===false) {
 			$this->logging->addError('data for the present frame cannot be fetched. '.stream::getLastError());
 			return $this->logError(
 				'data for the present frame cannot be fetched. '.stream::getLastError()
 			);
-		
+		}
+
+
 		$this->streamVolume['present']= count($stream);
 		if($this->streamVolume['present']<10) {
 			$error = 'insufficient data for the present frame '.
 				$frame[0]['end'].' - '.$frame[count($frame)-1]['start'].
 				'. '.$this->streamVolume['present'].' documents found. The analyzer needs 10 documents at least.';
-			
+
 			$this->logging->addError($error);
 			return $this->logError($error);
 		}
 
-		$this->logging->addDebug('the amount of the data in the present frame : '.$this->streamVolume['present']);	
+		$this->logging->addDebug('the amount of the data in the present frame : '.$this->streamVolume['present']);
 		$this->tokens['present']=Tokenization::produceTFList($stream);
-		
+
 		$present=array();
 		foreach($stream as $i){
 			$i['text']=trim(preg_replace('#(^RT)|:#ui','',$i['text']));
@@ -375,7 +378,7 @@ class BurstyDetection
 				$tokens=Tokenization::tokenize(mb_strtolower($i['text']));
 				if(count($tokens)>0)
 					$present[]=array(
-						'text'=>$i['text'], 
+						'text'=>$i['text'],
 						'frequency'=>1,
 						'tokens'=>$tokens
 					);
@@ -384,20 +387,20 @@ class BurstyDetection
 		}
 
 		$this->streams=array('present'=>$present);
-		
+
 		$past=array();
 		foreach($this->sampleTimes['past'] as $frame){
-			
+
 			$stream=$this->fetchFrameStream($frame);
 			if($stream===false) {
 				$error = 'data for the past frame cannot be fetched. '.stream::getLastError();
 				$this->logging->addError($error);
 				return $this->logError($error);
 			}
-			
+
 			$frameCount=count($stream);
 			$this->streamVolume['pastFrames'][]=$frameCount;
-			
+
 			$this->logging->addDebug('the amount of the data in the past frame '
 				.$frame[0]['end'].' - '.$frame[count($frame[1])]['end']
 				.' : '.$frameCount);
@@ -406,11 +409,11 @@ class BurstyDetection
 				$error = 'insufficient data in the past frame '.
 					$frame[0]['end'].' - '.$frame[count($frame[1])]['end'].
 					'. '.$frameCount.' documents found';
-				
+
 				$this->logging->addError($error);
 				// return $this->logError($error);
 			}
-		
+
 			$this->dumpData(
 				'past: '.$frame[0]['end'].' - '.$frame[count($frame[1])]['end'], $stream);
 
@@ -432,7 +435,7 @@ class BurstyDetection
 
 			foreach($this->tokens['pastFrames'] as $frameId=>$frameTokens)
 				if(isset($frameTokens[$token])){
-					
+
 					$frameVolume=$this->streamVolume['pastFrames'][$frameId];
 
 					$pastFrequency[]=array(
@@ -444,19 +447,19 @@ class BurstyDetection
 				}
 
 
-			
+
 			if(count($pastRatio)>0)
 				$avgRatio=array_sum($pastRatio)/count($this->tokens['pastFrames']);
 			else
 				$avgRatio=0.0001;
 
 			$presentRatio=$tokenFrequency/$this->streamVolume['present'];
-			
+
 			if($presentRatio>$avgRatio)
 				$chi=pow($presentRatio-$avgRatio,2)/$avgRatio;
 			else
 				$chi=-1;
-			
+
 			if($chi>$this->thresholdChi && $presentRatio>$this->thresholdRatio)
 				$this->burstyTerms[]=array(
 					'term'=>$token,
@@ -481,16 +484,16 @@ class BurstyDetection
 			}
 			$debugCounter++;
 		}
-		
+
 		$this->dumpData('present terms', $debugData);
-		
+
 		$this->burstyTerms= Arrays::usort(
 			$this->burstyTerms, 'presentFrequency', 'desc'
 		);
 	}
 
 	protected function detectBurstyEvents(){
-		
+
 		$this->dumpData('emerging terms', array_slice($this->burstyTerms, 0, 30));
 
 		$burstyTerms=array();
@@ -501,16 +504,16 @@ class BurstyDetection
 		while(count($burstyTerms)>0){
 			$mostSimilar=null;
 			$highestScore=0;
-			
+
 			foreach($this->streams['present'] as $i){
-				
+
 				$tokenWeight=$i['frequency'] / count($i['tokens']);
 				$intersect=array_intersect($i['tokens'], $burstyTerms);
 				$similarityScore=count($intersect) * $tokenWeight;
-				
+
 				if($similarityScore>$highestScore){
 					$i['similarity']=$similarityScore;
-					
+
 					foreach($intersect as $itoken)
 						foreach($this->burstyTerms as $bToken)
 							if($bToken['term']==$itoken){
@@ -521,13 +524,13 @@ class BurstyDetection
 					$mostSimilar=$i;
 					$highestScore=$similarityScore;
 				}
-			
-			} // end of foreach of stream 
+
+			} // end of foreach of stream
 
 			if($mostSimilar==null) break;
-			
+
 			$this->burstyEvents[]=$mostSimilar;
-			
+
 			foreach($mostSimilar['intersect'] as $bursty)
 				foreach($burstyTerms as $k=>$i)
 					if($i==$bursty['term'])
@@ -548,7 +551,7 @@ class BurstyDetection
 
 		$this->detectBurstyTerms();
 		$this->detectBurstyEvents();
-		
+
 		return $this->burstyEvents;
 	}
 }

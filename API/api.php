@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../resources/config/dev.php';
+require_once __DIR__ . '/../resources/config/default.php';
 
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
